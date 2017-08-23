@@ -4,4 +4,4 @@
 
 # Test file
 
-# Site : https://teampmg.github.io/PerfectMakeGirls/
+# Site : https://TeamPMG.github.io/PerfectMakeGirls/
