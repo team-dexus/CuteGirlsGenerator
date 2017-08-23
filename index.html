@@ -16,22 +16,19 @@
 	function main(){
 		if(c<inText.length){
 		s+=inText.substr(c,1);
-        	display.innerText=s;
+        	display.innerText=s; // animation of text motion
         	c++;
 	}else if(c==inText.length){
-        	shel.innerHTML='<h1>-Generate <span class=\"text\">ultimate cute</span> girls.-</h1>';
+        	shel.innerHTML='<h1>-Generate <span class=\"text\">ultimate cute</span> girls.-</h1>'; // set html tag
         	c++
 		}
 	}
-    
-
-		setInterval(main,70);
+		setInterval(main,70); // call main function in 70/ms
 	
-    function generate(){ //Added by mirukuma
+    function generate(){ //Added by mirukuma, Changed by JPNYKW
 		var pic=document.getElementById("GirlPic");
-		var item=["MG7.png" , "MG57.png" , "code052.png" ]
-		rand = Math.floor( Math.random() * 3 );
-		pic.src=item[rand]
+		var item=["MG7.png","MG57.png","code052.png"]
+		pic.src=item[~~(Math.random()*3)];
 	}
 	</script>
 
@@ -52,7 +49,7 @@
 		<span id="shel"><h1 id="display">-</h1></span><!--Added by JPNYKW-->
 		<p>We’ll make new system better than ‘Make Girls’.</p><!--Added by mirukuma-->
 		<p>Cute girls will be a save the world. we think so much.</p><!--Added by JPNYKW-->
-		<button onclick="generate()">Generate!</button><!--Added by mirukuma-->
+		<button onclick="generate()">Generate!</button><!--Added by mirukuma--><br><!--Added by JPNYKW-->
 		<img id="GirlPic"/><!--Added by mirukuma-->
 	</center>
 </body>
