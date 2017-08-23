@@ -3,27 +3,33 @@
 
 <head>
   <script>
-    display=document.getElementById('display');
-    inText='Sex is the ultimate communication.';
-    c=0;
+    var inText='Sex is the ultimate communication.';
+    var s='';
+    var c=0;
+	
+    function init(){
+	var display=document.getElementById('display');
+	var shel=document.getElementById('shel');
+    }
     
     function main(){
       if(c<inText.length){
-        display.innerText+=inText.substr(c,1);
+	s+=inText.substr(c,1);
+        display.innerText=s;
         c++;
       }else if(c==inText.length){
-        display.innerHTML='<h1><span style=\"color:#fa8e00\">Sex</span> is the ultimate communication.</h1>';
+        shel.innerHTML='<h1><span style=\"color:#fa8e00\">Sex</span> is the ultimate communication.</h1>';
         c++
       }
     }
     
-    setInterval(main,250);
+    setInterval(main,70);
   </script>
 </head>
 
- <body>
+<body onload="init()">
   <center>
-    <h1 id="display"></h1>
+   <span id="shel"><h1 id="display"></h1></span>
     <p>We’ll make new system better than ‘Make Girls’.</p>
   </center>
 </body>
