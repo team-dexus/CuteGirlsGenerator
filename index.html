@@ -2,36 +2,48 @@
 <html>
 
 <head>
-  <script>
-    var inText='Sex is the ultimate communication.';
-    var s='';
-    var c=0;
+	<script>
+	var inText='Sex is the ultimate communication.';
+	var s='';
+	var c=0;
 	
-    function init(){
-	var display=document.getElementById('display');
-	var shel=document.getElementById('shel');
-    }
+	function init(){
+		var display=document.getElementById('display');
+		var shel=document.getElementById('shel');
+    	}
     
-    function main(){
-      if(c<inText.length){
-	s+=inText.substr(c,1);
-        display.innerText=s;
-        c++;
-      }else if(c==inText.length){
-        shel.innerHTML='<h1><span style=\"color:#fa8e00\">Sex</span> is the ultimate communication.</h1>';
-        c++
-      }
-    }
+	function main(){
+		if(c<inText.length){
+		s+=inText.substr(c,1);
+        	display.innerText=s;
+        	c++;
+	}else if(c==inText.length){
+        	shel.innerHTML='<h1><span class=\"text\">Sex</span> is the ultimate communication.</h1>';
+        	c++
+		}
+	}
     
-    setInterval(main,70);
-  </script>
+		setInterval(main,70);
+	</script>
+
+	<style>
+		body{
+			background: linear-gradient(-115deg, #FFD85B, #FC5BFF, #FF81CB);
+			color: #FCFCFC;
+		}
+		.text{
+			color: #FFE66B;
+		}
+	</style>
+
 </head>
 
 <body onload="init()">
-  <center>
-   <span id="shel"><h1 id="display"></h1></span>
-    <p>We’ll make new system better than ‘Make Girls’.</p>
-  </center>
+	<center>
+		<span id="shel"><h1 id="display"></h1></span>
+		<p>We’ll make new system better than ‘Make Girls’.</p>
+		<p>Cute girls will be a save the world. we think so good</p>
+	</center>
 </body>
 
 </html>
