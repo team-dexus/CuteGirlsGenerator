@@ -1,9 +1,31 @@
 <!DOCTYPE html>
 <html>
-<body>
+
+<head>
+  <script>
+    display=document.getElementById('display');
+    inText='Sex is the ultimate communication.';
+    c=0;
+    
+    function main(){
+      if(c<inText.length){
+        display.innerText+=inText.substr(c,1);
+        c++;
+      }else if(c==inText.length){
+        display.innerHTML='<h1><span style=\"color:#fa8e00\">Sex</span> is the ultimate communication.</h1>';
+        c++
+      }
+    }
+    
+    setInterval(main,250);
+  </script>
+</head>
+
+ <body>
   <center>
-    <h1><span style="color:#fa8e00">Sex</span> is the ultimate communication.</h1>
+    <h1 id="display"></h1>
     <p>We’ll make new system better than ‘Make Girls’.</p>
   </center>
 </body>
+
 </html>
