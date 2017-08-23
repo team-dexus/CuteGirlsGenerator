@@ -24,7 +24,15 @@
 		}
 	}
     
+
 		setInterval(main,70);
+	
+    function generate(){ //Added by mirukuma
+		var pic=document.getElementById("GirlPic");
+		var item=["MG7.png" , "MG57.png" , "code052.png" ]
+		rand = Math.floor( Math.random() * 3 );
+		pic.src=item[rand]
+	}
 	</script>
 
 	<style> /*Added by JPNYKW*/
@@ -44,6 +52,8 @@
 		<span id="shel"><h1 id="display">-</h1></span><!--Added by JPNYKW-->
 		<p>We’ll make new system better than ‘Make Girls’.</p><!--Added by mirukuma-->
 		<p>Cute girls will be a save the world. we think so much.</p><!--Added by JPNYKW-->
+		<button onclick="generate()">Generate!</button><!--Added by mirukuma-->
+		<img id="GirlPic"/><!--Added by mirukuma-->
 	</center>
 </body>
 
