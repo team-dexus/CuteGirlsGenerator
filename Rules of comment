@@ -1,0 +1,11 @@
+-Rules of comment of source codes-
+
+1. if no one has added any comment yet.
+  -Grammar of comments
+  a. add new code - Added by USER_NAME
+  b. change code - Changed by USER NAME
+  
+2. If someone has already added comments.
+  -Grammar of comments
+   a. add this character in to last : ','
+   b. write to obey grammar of 1-a or 1-b
