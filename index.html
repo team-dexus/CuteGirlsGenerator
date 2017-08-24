@@ -7,7 +7,9 @@
 	var inText='Generate ultimate cute girls.-';
 	var s='-';
 	var c=0;
-	
+		
+	tag=str=>str.split(/[\　\ ]+/ig); // search words open
+		
 	function init(){
 		var display=document.getElementById('display');
 		var shel=document.getElementById('shel');
@@ -25,12 +27,14 @@
 	}
 		setInterval(main,70); // call main function in 70/ms
 	
-    function generate(){ //Added by mirukuma, Changed by JPNYKW ,Changed by mirukuma
-		var pic=document.getElementById("GirlPic");
-		var item=["MG7.png","MG57.png","code100.png"]
-		pic.src=item[~~(Math.random()*3)];
-		var text=document.getElementById("words").value;
-		document.getElementById("ShowText").textContent="Generation result in "+text;
+    function generate(){ //Added by mirukuma ,Changed by JPNYKW ,Changed by mirukuma ,Changed by JPNYKW
+		var pic=document.getElementById('GirlPic');
+		var item=['MG7.png','MG57.png','code100.png']
+		var text=document.getElementById('words').value;
+	    	var arrayRes=document.getElementById('ArrayResult');
+	    	document.getElementById('ShowText').textContent='Generation result in '+text;
+	    	document.getElementById('ArrayRes').innerHTML=tag(text).forEach(function(e,i){`<span id=res${i}>${e}</span><br>`});
+	    	pic.src=item[~~(Math.random()*3)];
 		
 	}
 	</script>
@@ -55,6 +59,7 @@
 		<input id="words" value="幼女 セックス"/> <!--Added by mirukuma-->
 		<button onclick="generate()">Generate!</button><!--Added by mirukuma--><br><!--Added by JPNYKW-->
 		<span id="ShowText"></span></br>
+		<div id="ArrayRes"></div><!--Added by JPNYKW-->
 		<img id="GirlPic"/><!--Added by mirukuma-->
 		<br>&spades; Here is page of motion test. yet not finished.<!--Added by JPNYKW-->
 	</center>
