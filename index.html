@@ -32,7 +32,7 @@
 		var item=['MG7.png','MG57.png','code100.png']
 		var text=document.getElementById('words').value;
 	    	var arrayRes=document.getElementById('ArrayResult');
-	    	var result='===WORDS===';
+	    	var result='===WORDS===<br>';
 	    	tag(text).forEach(function(e,i,a){result+=`<span id=res${i}>${e}</span><br>`});
 	    	document.getElementById('ShowText').textContent='Generation result in '+text;
 	    	document.getElementById('ArrayRes').innerHTML=`${result}=========`;
