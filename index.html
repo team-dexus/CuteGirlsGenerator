@@ -32,10 +32,10 @@
 		var item=['MG7.png','MG57.png','code100.png']
 		var text=document.getElementById('words').value;
 	    	var arrayRes=document.getElementById('ArrayResult');
-	    	var result='';
+	    	var result='===WORDS===';
 	    	tag(text).forEach(function(e,i,a){result+=`<span id=res${i}>${e}</span><br>`});
 	    	document.getElementById('ShowText').textContent='Generation result in '+text;
-	    	document.getElementById('ArrayRes').innerHTML=result;
+	    	document.getElementById('ArrayRes').innerHTML=`${result}=========`;
 	    	pic.src=item[~~(Math.random()*3)];
 		
 	}
@@ -64,6 +64,7 @@
 		<div id="ArrayRes"></div><!--Added by JPNYKW-->
 		<img id="GirlPic"/><!--Added by mirukuma-->
 		<br>&spades; Here is page of motion test. yet not finished.<!--Added by JPNYKW-->
+		<br>version beta 1.0<!--Added by JPNYKW-->
 	</center>
 </body>
 
