@@ -14,7 +14,7 @@ import os
 import numpy as np
 import glob
 from PIL import Image
-TRAIN_IMAGE_PATH="/Users/KOKI/Documents/TrainData2/*"
+TRAIN_IMAGE_PATH="/Users/KOKI/Documents/TrainData/*"
 GENERATED_IMAGE_PATH="/Users/KOKI/Documents/Generated/"
 BATCH_SIZE = 32
 NUM_EPOCH = 20
@@ -92,9 +92,9 @@ def save_generated_image(image,name):
     
 
 def train():
-    X_train=data_import()
+    X_train=data_import(160,100 )
     X_train = (X_train.astype(np.float32) - 127.5)/127.5
-    X_train = X_train.reshape(X_train.shape[0], 1, X_train.shape[1], X_train.shape[2])
+    X_train = X_train.reshape(X_train.shape[0:4])
 
     d = discriminator_model(160,100)
     d_opt = Adam(lr=1e-5, beta_1=0.1)
@@ -115,12 +115,19 @@ def train():
             noise = np.array([np.random.uniform(-1, 1, 100) for _ in range(BATCH_SIZE)])
             image_batch = X_train[index*BATCH_SIZE:(index+1)*BATCH_SIZE]
             generated_images = g.predict(noise, verbose=1)
-
+            generated_images=generated_images.reshape(generated_images.shape[0:4])
             # 生成画像を出力
             if index % 500 == 0:
+
+                generated_images=generated_images*127.5+127.5
                 save_generated_image(generated_images,"%04d_%04d.png" % (epoch, index))
+                generated_images=(generated_images-127.5)/127.5
+            
             # discriminatorを更新
+            print(image_batch.shape)
+            print(generated_images.shape)
             X = np.concatenate((image_batch, generated_images))
+            X=X.reshape(X.shape+(1,))
             y = [1]*BATCH_SIZE + [0]*BATCH_SIZE
             d_loss = d.train_on_batch(X, y)
 
@@ -131,7 +138,6 @@ def train():
 
         g.save_weights('generator.h5')
         d.save_weights('discriminator.h5')
-        
         
 train()
 '''
