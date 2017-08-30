@@ -4,7 +4,7 @@ from keras.layers import Reshape
 from keras.layers.core import Activation
 from keras.layers.normalization import BatchNormalization
 from keras.layers.convolutional import UpSampling3D
-from keras.layers.convolutional import Conv2D, Conv3D, MaxPooling2D, MaxPooling3D
+from keras.layers.convolutional import Conv3D, MaxPooling3D
 from keras.layers.core import Flatten
 from keras.optimizers import Adam
 
@@ -14,8 +14,8 @@ import os
 import numpy as np
 import glob
 from PIL import Image
-TRAIN_IMAGE_PATH="/Users/KOKI/Documents/TrainData/*"
-GENERATED_IMAGE_PATH="/Users/KOKI/Documents/Generated/"
+TRAIN_IMAGE_PATH="/Users/KOKI/Documents/TrainData/*" 
+GENERATED_IMAGE_PATH="/Users/KOKI/Documents/Generated/" 
 BATCH_SIZE = 32
 NUM_EPOCH = 20
 
@@ -103,6 +103,8 @@ def train():
     # generator+discriminator （discriminator部分の重みは固定）
     d.trainable = False
     g = generator_model(40,25)
+    #g.load_weights('generator.h5') 学習データをロードさせたいときに使う。本当にロードできるかはわからん
+    #d.load_weights('discriminator.h5')
     dcgan = Sequential([g, d])
     g_opt = Adam(lr=2e-4, beta_1=0.5)
     dcgan.compile(loss='binary_crossentropy', optimizer=g_opt)
@@ -117,7 +119,7 @@ def train():
             generated_images = g.predict(noise, verbose=1)
             generated_images=generated_images.reshape(generated_images.shape[0:4])
             # 生成画像を出力
-            if index % 500 == 0:
+            if index % 2 == 0:
 
                 generated_images=generated_images*127.5+127.5
                 save_generated_image(generated_images,"%04d_%04d.png" % (epoch, index))
@@ -139,17 +141,5 @@ def train():
         g.save_weights('generator.h5')
         d.save_weights('discriminator.h5')
         
+
 train()
-'''
-BATCH_SIZE=128
-noise = np.array([np.random.uniform(-1, 1, 100) for _ in range(BATCH_SIZE)])
-g=generator_model(40,25)
-d=discriminator_model(160,100)
-image=g.predict(noise,verbose=1)
-image=image*127.5+127.5
-image=image.reshape(image.shape[0:4])
-save_generated_image(image,"IWannaFuckCuteLittleGirls")
-image=image.reshape(image.shape+(1,))
-d.predict(image,verbose=1)
- .save(GENERATED_IMAGE_PATH+"%04d_%04d.png" % (epoch, index))
-'''
