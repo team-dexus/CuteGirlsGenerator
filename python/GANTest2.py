@@ -14,21 +14,22 @@ import os
 import numpy as np
 import glob
 from PIL import Image
-TRAIN_IMAGE_PATH="/Users/KOKI/Documents/TrainData/*" 
+TRAIN_IMAGE_PATH="/Users/KOKI/Documents/TrainData3/*" 
 GENERATED_IMAGE_PATH="/Users/KOKI/Documents/Generated/" 
-BATCH_SIZE = 64
-NUM_EPOCH = 30
+BATCH_SIZE = 13
+NUM_EPOCH = 2000
+DIM=3
 
 def generator_model(width,height):
     model = Sequential()
     model.add(Dense(input_dim=100, output_dim=128))
     model.add(Activation('tanh'))
-    model.add(Dense(width*height*3))
+    model.add(Dense(width*height*DIM))
     model.add(Activation('tanh'))
-    model.add(Dense(4*width*height*3))
+    model.add(Dense(4*width*height*DIM))
     model.add(BatchNormalization())
     model.add(Activation('tanh'))
-    model.add(Reshape((height, width,  3, 4), input_shape=(4*width*height*3,)))
+    model.add(Reshape((height, width, DIM, 4), input_shape=(4*width*height*DIM,)))
     model.add(UpSampling3D(size=(2, 2, 1)))
     model.add(Conv3D(4, (2, 2, 1), padding='same'))
     model.add(Activation('tanh'))
@@ -43,7 +44,7 @@ def discriminator_model(width,height):
     model.add(
             Conv3D(16, (5, 5, 5),
             padding='same',
-            input_shape=(height, width, 3, 1))
+            input_shape=(height, width, DIM, 1))
             )
     model.add(Activation('tanh'))
     model.add(MaxPooling3D(pool_size=(2, 2, 1)))
@@ -60,12 +61,17 @@ def discriminator_model(width,height):
     return model
     
 def data_import(width,height):
-    image = np.empty((0,height,width,3), dtype=np.uint8)
+    image = np.empty((0,height,width,DIM), dtype=np.uint8)
     list=glob.glob(TRAIN_IMAGE_PATH)
     for i in list:
-        im_reading = np.array( Image.open(i).resize((width,height)))
+        im_reading = Image.open(i).resize((width,height))
+        im_reading = im_reading.convert("RGB")
+        im_reading = np.array( im_reading)
+        print(im_reading.shape)
         #im_reading = im_reading.transpose(1,0,2)
+        print(i)
         image = np.append(image, [im_reading], axis=0)
+        
         
     return image
 
@@ -74,7 +80,7 @@ def combine_images(generated_images):
     cols = int(math.sqrt(total))
     rows = math.ceil(float(total)/cols)
     width, height = generated_images.shape[1:3]
-    combined_image = np.zeros((width*cols, height*rows,3),
+    combined_image = np.zeros((width*cols, height*rows,DIM),
                               dtype=generated_images.dtype)
     #coreturn combined_image
 
@@ -109,8 +115,8 @@ def train(width,height):
     # generator+discriminator （discriminator部分の重みは固定）
     d.trainable = False
     g = generator_model(round(WIDTH/4),round(HEIGHT/4))
-    g.load_weights('generator.h5') #学習データをロードさせたいときに使う。本当にロードできるかはわからん
-    d.load_weights('discriminator.h5')
+    g.load_weights('generator2.h5') #学習データをロードさせたいときに使う。本当にロードできるかはわからん
+    d.load_weights('discriminator2.h5')
     dcgan = Sequential([g, d])
     g_opt = Adam(lr=2e-4, beta_1=0.5)
     dcgan.compile(loss='binary_crossentropy', optimizer=g_opt)
@@ -125,11 +131,13 @@ def train(width,height):
             generated_images = g.predict(noise, verbose=1)
             generated_images=generated_images.reshape(generated_images.shape[0:4])
             # 生成画像を出力
+            '''
             if index % BATCH_SIZE == 0:
 
                 generated_images=generated_images*127.5+127.5
                 save_generated_image(generated_images,"%04d_%04d.png" % (epoch, index))
                 generated_images=(generated_images-127.5)/127.5
+            '''
             
             # discriminatorを更新
             print(image_batch.shape)
@@ -137,16 +145,23 @@ def train(width,height):
             X = np.concatenate((image_batch, generated_images))
             X=X.reshape(X.shape+(1,))
             y = [1]*BATCH_SIZE + [0]*BATCH_SIZE
-            d_loss = d.train_on_batch(X, y)
+            if True:
+                d_loss = d.train_on_batch(X, y)
+            else:
+                d_loss=0
 
-            # generatorを更新
+            # generatorを更新 
             noise = np.array([np.random.uniform(-1, 1, 100) for _ in range(BATCH_SIZE)])
             g_loss = dcgan.train_on_batch(noise, [1]*BATCH_SIZE)
             print("epoch: %d, batch: %d, g_loss: %f, d_loss: %f" % (epoch, index, g_loss, d_loss))
-
-        g.save_weights('generator.h5')
-        d.save_weights('discriminator.h5')
         
 
-train(40,24)
+        
+        g.save_weights('generator2.h5')
+        d.save_weights('discriminator2.h5')
+    generated_images=generated_images*127.5+127.5
+    save_generated_image(generated_images,"%04d_%04d.png" % (epoch, index))
 
+train(24,40)
+#test=data_import(24,40)
+#save_generated_image(test,"sex is life")
