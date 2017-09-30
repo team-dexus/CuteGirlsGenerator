@@ -7,14 +7,24 @@
 	var inText='Generate ultimate cute girls.-';
 	var s='-';
 	var c=0;
-		
+
 	tag=str=>str.split(/[\　\ ]+/ig); // search words open
-		
+
 	function init(){
 		var display=document.getElementById('display');
 		var shel=document.getElementById('shel');
-    	}
-    
+		const model = new KerasJS.Model({ //--Added by mirukuma
+  		filepaths: {
+    		model: './data/model.json',
+    		weights: './data/generator2_weights.buf',
+    		metadata: './data/generator2_metadata.json'
+  		},
+  		gpu: true
+		})
+		var WIDTH=24;
+		var HEIGHT=40;
+    }
+
 	function main(){
 		if(c<inText.length){
 		s+=inText.substr(c,1);
@@ -26,21 +36,10 @@
 		}
 	}
 		setInterval(main,70); // call main function in 70/ms
-	
-    function generate(){ //Added by mirukuma ,Changed by JPNYKW ,Changed by mirukuma ,Changed by JPNYKW
-		var pic=document.getElementById('GirlPic');
-		var item=['MG7.png','MG57.png','code100.png']
-		var text=document.getElementById('words').value;
-	    	var arrayRes=document.getElementById('ArrayResult');
-	    	var result='===WORDS===<br>';
-	    	tag(text).forEach(function(e,i,a){result+=`<span id=res${i}>${e}</span><br>`});
-	    	document.getElementById('ShowText').textContent='Generation result in '+text;
-	    	document.getElementById('ArrayRes').innerHTML=`${result}=========`;
-	    	pic.src=item[~~(Math.random()*3)];
-		
-	}
-	</script>
 
+	</script>
+	<script src="dist/keras.js"></script><!--Added by mirukuma-->
+  <script type="text/javascript" src="Generate.js"></script> <!--Added by mirukuma-->
 	<style> /*Added by JPNYKW*/
 		body{
 			background: linear-gradient(-90deg, #FFD85B, #FC5BFF, #FF81CB);
