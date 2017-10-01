@@ -13,41 +13,37 @@ function generate(){ //Added by mirukuma ,Changed by JPNYKW ,Changed by mirukuma
 
 }
 
-function generate2(){ //Added by mirukuma ,Changed by JPNYKW ,Changed by mirukuma ,Changed by JPNYKW
+function generate2() { //Added by mirukuma ,Changed by JPNYKW ,Changed by mirukuma ,Changed by JPNYKW
   const model = new KerasJS.Model({ //--Added by mirukuma
     filepaths: {
-      model: '/data/model.json',
-      weights: '/data/generator2_weights.buf',
-      metadata: '/data/generator2_metadata.json'
+      model: './data/generator.json',
+      weights: './data/generator_weights.buf',
+      metadata: './data/generator_metadata.json'
     },
     gpu: true
   })
-
-
-  inputData = new Float32Array(100)
-  for(var i=0; i<100; i++){
-    inputData[i]=Math.random();
-  }
-  console.log("life!")
-
-  out=model.ready().then(() => {
-    model.predict(inputData).then(outputData => {
-          var output_tensor = outputData.float_m1p1;
-          console.log("sex")
-          var imgarray = new Uint8Array(output_tensor.data.map(function (x) {
-              return (x + 1) / 2 * 255;
-          }));
-          var imageData = image2Darray(imgarray, output_tensor.shape[0], output_tensor.shape[1]);
-          console.log("is")
-          var canvas = (typeof(canvas_or_id) === 'string') ? $('#' + canvas_or_id)[0] : canvas_or_id;
-          if (canvas) {
-              var context = canvas.getContext('2d');
-              context.putImageData(imageData, 0, 0);
-          }
-
-        return imageData;
-       //ここにoutputを書く。
+  console.log(model)
+  model.ready()
+    .then(() => {
+      // input data object keyed by names of the input layers
+      // or `input` for Sequential models
+      // values are the flattened Float32Array data
+      // (input tensor shapes are specified in the model config)
+      const inputData = {
+        'input_1': new Float32Array(100)
+      }
+      console.log(inputData)
+      // make predictions
+      return model.predict(inputData)
     })
-  })
-  return out;
+    .then(outputData => {
+      // outputData is an object keyed by names of the output layers
+      // or `output` for Sequential models
+      // e.g.,
+      // outputData['fc1000']
+    })
+    .catch(err => {
+      console.log(err)
+    })
+
 }

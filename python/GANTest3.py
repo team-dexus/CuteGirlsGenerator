@@ -22,6 +22,7 @@ DIM=3
 
 def generator_model(width,height):
     model = Sequential()
+    model.add(Dense(input_dim=100, output_dim=128))
     model.add(Activation('tanh'))
     model.add(Dense(width*height*DIM))
     model.add(Activation('tanh'))
@@ -114,8 +115,8 @@ def train(width,height):
     # generator+discriminator （discriminator部分の重みは固定）
     d.trainable = False
     g = generator_model(round(WIDTH/4),round(HEIGHT/4))
-    g.load_weights('generator2.h5') #学習データをロードさせたいときに使う。本当にロードできるかはわからん
-    d.load_weights('discriminator2.h5')
+    #g.load_weights('generator3.h5') #学習データをロードさせたいときに使う。本当にロードできるかはわからん
+    #d.load_weights('discriminator3.h5')
     dcgan = Sequential([g, d])
     g_opt = Adam(lr=2e-4, beta_1=0.5)
     dcgan.compile(loss='binary_crossentropy', optimizer=g_opt)
@@ -156,8 +157,8 @@ def train(width,height):
         
 
         
-        g.save_weights('generator2.h5')
-        d.save_weights('discriminator2.h5')
+        g.save_weights('generator3.h5')
+        d.save_weights('discriminator3.h5')
     generated_images=generated_images*127.5+127.5
     save_generated_image(generated_images,"%04d_%04d.png" % (epoch, index))
 

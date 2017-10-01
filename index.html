@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
-
 <head>
+	<meta charset="utf-8"/>
 	<title>PerfectMakeGirls(Beta)</title><!--Added by CSlash-->
 	<script>// Added by JPNYKW
 	var inText='Generate ultimate cute girls.-';
@@ -13,16 +13,6 @@
 	function init(){
 		var display=document.getElementById('display');
 		var shel=document.getElementById('shel');
-		const model = new KerasJS.Model({ //--Added by mirukuma
-  		filepaths: {
-    		model: './data/model.json',
-    		weights: './data/generator2_weights.buf',
-    		metadata: './data/generator2_metadata.json'
-  		},
-  		gpu: true
-		})
-		var WIDTH=24;
-		var HEIGHT=40;
     }
 
 	function main(){
@@ -37,9 +27,11 @@
 	}
 		setInterval(main,70); // call main function in 70/ms
 
+
+
 	</script>
-	<script src="dist/keras.js"></script><!--Added by mirukuma-->
-  <script type="text/javascript" src="Generate.js"></script> <!--Added by mirukuma-->
+	<script src="dist/keras.js"> </script><!--Added by mirukuma-->
+  <script src="generate.js"></script> <!--Added by mirukuma-->
 	<style> /*Added by JPNYKW*/
 		body{
 			background: linear-gradient(-90deg, #FFD85B, #FC5BFF, #FF81CB);
@@ -58,7 +50,7 @@
 		<p>We’ll make new system better than ‘<a href="http://make.girls.moe">Make Girls Moe</a>’.</p><!--Added by mirukuma,Changed by CSlash-->
 		<p>Cute girls will be a save the world. we think so much.</p><!--Added by JPNYKW-->
 		<input id="words" value="幼女"/> <!--Added by mirukuma,Changed by JPNYKW-->
-		<button onclick="generate()">Generate!</button><!--Added by mirukuma--><br><!--Added by JPNYKW-->
+		<button onclick="generate2()">Generate!</button><!--Added by mirukuma--><!--Changed by mirukuma--><br><!--Added by JPNYKW-->
 		<span id="ShowText"></span></br>
 		<div id="ArrayRes"></div><!--Added by JPNYKW-->
 		<img id="GirlPic"/><!--Added by mirukuma-->
