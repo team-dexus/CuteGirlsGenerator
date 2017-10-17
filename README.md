@@ -29,4 +29,4 @@ And, we are Scratcher.
 
 ## To use python in javascript code  
 
->Comming soon
+>Coming soon
