@@ -17,7 +17,7 @@ def generator_model(width,height):
     model.add(Dense(width*height*DIM))
     model.add(Activation('tanh'))
     model.add(Dense(4*width*height*DIM))
-    model.add(BatchNormalization())
+    #model.add(BatchNormalization())
     model.add(Activation('tanh'))
     model.add(Reshape((height, width, DIM, 4), input_shape=(4*width*height*DIM,)))
     model.add(UpSampling3D(size=(2, 2, 1)))

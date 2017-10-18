@@ -30,7 +30,7 @@ function generate2() { //Added by mirukuma ,Changed by JPNYKW ,Changed by miruku
       // values are the flattened Float32Array data
       // (input tensor shapes are specified in the model config)
       const inputData = {
-        'input_1': new Float32Array(100)
+        'input': new Float32Array(100)
       }
       console.log(inputData)
       // make predictions
@@ -41,6 +41,7 @@ function generate2() { //Added by mirukuma ,Changed by JPNYKW ,Changed by miruku
       // or `output` for Sequential models
       // e.g.,
       // outputData['fc1000']
+      console.log(outputData)
     })
     .catch(err => {
       console.log(err)
