@@ -17,7 +17,7 @@ from PIL import Image
 TRAIN_IMAGE_PATH="/Users/KOKI/Documents/TrainData3/*" 
 GENERATED_IMAGE_PATH="/Users/KOKI/Documents/Generated/" 
 BATCH_SIZE = 13
-NUM_EPOCH = 10
+NUM_EPOCH = 2000
 DIM=3
 
 def generator_model(width,height):
@@ -158,7 +158,7 @@ def train(width,height):
 
         
         g.save_weights('generator4.h5')
-        d.save_weights('discriminator.h5')
+        d.save_weights('discriminator4.h5')
         with open('generator.json', 'w') as f:
             f.write(g.to_json())
     generated_images=generated_images*127.5+127.5
