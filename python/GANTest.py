@@ -26,7 +26,7 @@ def generator_model(width,height):
     model.add(Dense(width*height*3))
     model.add(Activation('tanh'))
     model.add(Dense(4*width*height*3))
-    model.add(BatchNormalization())
+    #model.add(BatchNormalization())
     model.add(Activation('tanh'))
     model.add(Reshape((height, width,  3, 4), input_shape=(4*width*height*3,)))
     model.add(UpSampling3D(size=(2, 2, 1)))
@@ -109,8 +109,8 @@ def train(width,height):
     # generator+discriminator （discriminator部分の重みは固定）
     d.trainable = False
     g = generator_model(round(WIDTH/4),round(HEIGHT/4))
-    g.load_weights('generator.h5') #学習データをロードさせたいときに使う。本当にロードできるかはわからん
-    d.load_weights('discriminator.h5')
+    #g.load_weights('generator.h5') #学習データをロードさせたいときに使う。本当にロードできるかはわからん
+    #d.load_weights('discriminator.h5')
     dcgan = Sequential([g, d])
     g_opt = Adam(lr=2e-4, beta_1=0.5)
     dcgan.compile(loss='binary_crossentropy', optimizer=g_opt)

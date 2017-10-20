@@ -17,7 +17,7 @@ from PIL import Image
 TRAIN_IMAGE_PATH="/Users/KOKI/Documents/TrainData3/*" 
 GENERATED_IMAGE_PATH="/Users/KOKI/Documents/Generated/" 
 BATCH_SIZE = 13
-NUM_EPOCH = 2000
+NUM_EPOCH = 10
 DIM=3
 
 def generator_model(width,height):
@@ -27,7 +27,7 @@ def generator_model(width,height):
     model.add(Dense(width*height*DIM))
     model.add(Activation('tanh'))
     model.add(Dense(4*width*height*DIM))
-    model.add(BatchNormalization())
+    #model.add(BatchNormalization())
     model.add(Activation('tanh'))
     model.add(Reshape((height, width, DIM, 4), input_shape=(4*width*height*DIM,)))
     model.add(UpSampling3D(size=(2, 2, 1)))
@@ -157,11 +157,13 @@ def train(width,height):
         
 
         
-        g.save_weights('generator3.h5')
-        d.save_weights('discriminator3.h5')
+        g.save_weights('generator4.h5')
+        d.save_weights('discriminator.h5')
+        with open('generator.json', 'w') as f:
+            f.write(g.to_json())
     generated_images=generated_images*127.5+127.5
     save_generated_image(generated_images,"%04d_%04d.png" % (epoch, index))
 
-train(24,40)
+#train(24,40)
 #test=data_import(24,40)
 #save_generated_image(test,"sex is life")

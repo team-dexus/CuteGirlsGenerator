@@ -23,6 +23,7 @@ function generate2() { //Added by mirukuma ,Changed by JPNYKW ,Changed by miruku
     gpu: true
   })
   console.log(model)
+
   model.ready()
     .then(() => {
       // input data object keyed by names of the input layers
