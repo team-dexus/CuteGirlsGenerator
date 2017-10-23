@@ -24,7 +24,11 @@ def generator_model(width,height):
     model = Sequential()
     model.add(Dense(input_dim=100, output_dim=128))
     model.add(Activation('tanh'))
+    model.add(Dense(width*height))
+    model.add(Activation('tanh'))
     model.add(Dense(width*height*DIM))
+    model.add(Activation('tanh'))
+    model.add(Dense(2*width*height*DIM))
     model.add(Activation('tanh'))
     model.add(Dense(4*width*height*DIM))
     #model.add(BatchNormalization())
@@ -34,6 +38,8 @@ def generator_model(width,height):
     model.add(Conv3D(4, (2, 2, 1), padding='same'))
     model.add(Activation('tanh'))
     model.add(UpSampling3D(size=(2, 2, 1)))
+    model.add(Conv3D(2, (2, 2, 1), padding='same'))
+    model.add(Activation('tanh'))
     model.add(Conv3D(1, (2, 2, 1), padding='same'))
     model.add(Activation('tanh'))
     return model
@@ -132,6 +138,8 @@ def train(width,height):
 
     num_batches = int(X_train.shape[0] / BATCH_SIZE)
     print('Number of batches:', num_batches)
+    d_loss=0
+    g_loss=0
     for epoch in range(NUM_EPOCH):
 
         for index in range(num_batches):
@@ -140,13 +148,13 @@ def train(width,height):
             generated_images = g.predict(noise, verbose=1)
             generated_images=generated_images.reshape(generated_images.shape[0:4])
             # 生成画像を出力
-            '''
-            if index % BATCH_SIZE == 0:
+            
+            if epoch % 100 == 0:
 
                 generated_images=generated_images*127.5+127.5
                 save_generated_image(generated_images,"%04d_%04d.png" % (epoch, index))
                 generated_images=(generated_images-127.5)/127.5
-            '''
+            
             
             # discriminatorを更新
             print(image_batch.shape)
@@ -154,10 +162,8 @@ def train(width,height):
             X = np.concatenate((image_batch, generated_images))
             X=X.reshape(X.shape+(1,))
             y = [1]*BATCH_SIZE + [0]*BATCH_SIZE
-            if True:
+            if 1>g_loss-g_loss:
                 d_loss = d.train_on_batch(X, y)
-            else:
-                d_loss=0
 
             # generatorを更新 
             noise = np.array([np.random.uniform(-1, 1, 100) for _ in range(BATCH_SIZE)])
