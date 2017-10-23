@@ -1,7 +1,7 @@
 # PerfectMakeGirls
 
 ## What is the projects
->Please check the site of "Perfect Make Girls"  
+>Please check the site of "Make Girls Moe"  
 >as a prerequisite to progress the story.  
 
 <img src="http://i.cubeupload.com/iBs8gD.png" title="MakeGirlsMoe">
