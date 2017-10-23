@@ -117,14 +117,13 @@ def train(width,height):
     g = generator_model(round(WIDTH/4),round(HEIGHT/4))
    
     try:
-        open('generator.h5','x')
-    except:
         g.load_weights('generator.h5')
-        
-    try:
-        open('discriminator.h5','x')
     except:
+        print("generator couldn't load")
+    try:
         d.load_weights('discriminator.h5')
+    except:
+        print("discriminator couldn't load")
     
    
     dcgan = Sequential([g, d])
@@ -168,6 +167,8 @@ def train(width,height):
 
         
         g.save_weights('generator.h5')
+        with open('generator.json', 'w') as f:
+            f.write(g.to_json())
         d.save_weights('discriminator.h5')
 
     generated_images=generated_images*127.5+127.5
