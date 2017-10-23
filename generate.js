@@ -13,7 +13,7 @@ function generate(){ //Added by mirukuma ,Changed by JPNYKW ,Changed by mirukuma
 
 }
 
-function generate2() { //Added by mirukuma ,Changed by JPNYKW ,Changed by mirukuma ,Changed by JPNYKW
+function generate2() { //Added by mirukuma 
   const model = new KerasJS.Model({ //--Added by mirukuma
     filepaths: {
       model: './data/generator.json',
@@ -30,9 +30,14 @@ function generate2() { //Added by mirukuma ,Changed by JPNYKW ,Changed by miruku
       // or `input` for Sequential models
       // values are the flattened Float32Array data
       // (input tensor shapes are specified in the model config)
-      const inputData = {
-        'input': new Float32Array(100)
+      var noise= new Float32Array(100)
+      for(i=0; i<100; i=i+1){
+        noise[i]=Math.random()*2-1
       }
+      const inputData = {
+        'input': noise
+      }
+
       console.log(inputData)
       // make predictions
       return model.predict(inputData)
