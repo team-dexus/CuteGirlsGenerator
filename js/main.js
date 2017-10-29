@@ -9,7 +9,6 @@ window.onload=()=>{
 	
 	canv.width=128;
 	canv.height=128;
-	canv.style="background-color:rgba(70,70,70,120)";
 	
 	textRoll('-Generate ultimate cute girls-',d.getElementById('shel'),50
 		 ,'<h1>-Generate <span class="text">ultimate cute</span> girls.-</h1>');
