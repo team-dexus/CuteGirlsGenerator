@@ -49,6 +49,7 @@ function generate2() { //Added by mirukuma
       // outputData['fc1000']
       generatedData=outputData.output;
       console.log(generatedData);
+      drawGeneratedImage();
     })
     .catch(err => {
       console.log(err)
