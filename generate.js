@@ -48,6 +48,7 @@ function generate2() { //Added by mirukuma
       // e.g.,
       // outputData['fc1000']
       console.log(outputData)
+      cont.drawImageByDada=(outputData,24,40,0,2,0,0); // test code Added by JPNYKW
     })
     .catch(err => {
       console.log(err)
