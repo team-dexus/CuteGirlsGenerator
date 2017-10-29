@@ -2,6 +2,7 @@ var d=document;
 var m=Math;
 
 var canv,cont;
+var generatedData; // generate2()の戻り値を格納する変数
 
 window.onload=()=>{
 	canv=d.getElementById('output');
