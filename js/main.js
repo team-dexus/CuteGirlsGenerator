@@ -8,7 +8,7 @@ window.onload=()=>{
 	canv=d.getElementById('output');
 	cont=canv.getContext('2d');
 	
-	canv.width=168;
+	canv.width=164;
 	canv.height=200;
 	
 	textRoll('-Generate ultimate cute girls-',d.getElementById('display'),50
