@@ -1,23 +1,28 @@
-var inText='Generate ultimate cute girls.-';
-var s='-';
-var c=0;
+var d=document;
+var m=Math;
 
-tag=str=>str.split(/[\　\ ]+/ig); // search words open
+var canv,cont;
 
-function init(){
-	var display=document.getElementById('display');
-	var shel=document.getElementById('shel');
-   }
-
-function main(){
-	if(c<inText.length){
-	s+=inText.substr(c,1);
-       	display.innerText=s; // animation of text motion
-       	c++;
-}else if(c==inText.length){
-       	shel.innerHTML='<h1>-Generate <span class=\"text\">ultimate cute</span> girls.-</h1>'; // set html tag
-       	c++
-	}
+window.onload=()=>{
+	canv=d.getElementById('output');
+	cont=canv.getContext('2d');
+	
+	canv.width=128;
+	canv.height=128;
+	canv.style="background-color:rgba(70,70,70,120)";
+	
+	textRoll('-Generate ultimate cute girls-',d.getElementById('shel'),50
+		 ,'<h1>-Generate <span class="text">ultimate cute</span> girls.-</h1>');
 }
 
-setInterval(main,70); // call main function in 70/ms
+function textRoll(text,target,interval,afterInput){
+	let cnt=0;
+	let roll=setInterval(()=>{
+		cnt++;
+		target.innerText=text.substr(0,cnt);
+		if(cnt>text.length){
+			clearInterval(roll);
+			if(afterInput!=void(0))target.innerHTML=afterInput;
+		}
+	},interval);
+}
