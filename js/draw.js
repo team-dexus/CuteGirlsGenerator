@@ -7,7 +7,7 @@ CanvasRenderingContext2D.prototype.drawImageByDada=function($Array,$width,$heigh
 			let $color=$Array[$idx];
 			$color=[$Array[$idx+0],$Array[$idx+1],$Array[$idx+2]];
 			$color.forEach((e,i)=>{$color[i]=e*127.5+127.5});
-			this.drawFillBox($dx,$dy,$px,`rgb(${~~$color[0]-70},${~~$color[1]},${~~$color[2]},)`);
+			this.drawFillBox($dx,$dy,$px+1,`rgb(${~~$color[0]-70},${~~$color[1]},${~~$color[2]},)`);
 			$dx+=$px;
 			$idx+=3;
 		}
