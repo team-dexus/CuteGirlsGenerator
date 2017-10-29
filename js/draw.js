@@ -1,4 +1,4 @@
-CanvasRenderingContext2D.prototype.drawImageByDada=function($Array,$width,$height,$find,$px,$x,$y){
+CanvasRenderingContext2D.prototype.drawImageByData=function($Array,$width,$height,$find,$px,$x,$y){
 	let $dy=$y;
 	let $idx=$find;
 	for($hc=0;$hc<$height;$hc++){
@@ -21,5 +21,5 @@ CanvasRenderingContext2D.prototype.drawImageByDada=function($Array,$width,$heigh
 
 function drawGeneratedImage(){
       cont.clearRect(0,0,canv.width,canv.height);
-      cont.drawImageByDada(generatedData,24,40,0,7,0,0); // test code
+      cont.drawImageByData(generatedData,24,40,0,7,0,0); // test code
 }
