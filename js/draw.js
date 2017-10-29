@@ -8,14 +8,15 @@ CanvasRenderingContext2D.prototype.drawImageByDada=function($Array,$width,$heigh
 			let G=$Array[$idx+1]*127.5+127.5;
 			let B=$Array[$idx+2]*127.5+127.5;
 			R=~~R+',';G=~~G+',';B=~~B+'';
-			if($idx==0)console.log([R,G,B]);
 			this.drawFillBox($dx,$dy,$px+1,`rgb(${R+G+B})`);
 			$dx+=$px;
 			$idx+=3;
 		}
 		$dy+=$px;
 	}
-	console.log($idx);
+	// for debug
+	console.log(`id:${$idx}`);
+	console.log('Execution complete');
 }
 
 function drawGeneratedImage(){
