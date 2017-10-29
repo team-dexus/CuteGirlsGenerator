@@ -47,9 +47,9 @@ function generate2() { //Added by mirukuma
       // or `output` for Sequential models
       // e.g.,
       // outputData['fc1000']
-      generatedData=outputData.output;
-      console.log(generatedData);
-      drawGeneratedImage();
+      generatedData=outputData.output; // Added by JPNYKW
+      console.log(generatedData);  // Added by JPNYKW
+      drawGeneratedImage();  // Added by JPNYKW
     })
     .catch(err => {
       console.log(err)
