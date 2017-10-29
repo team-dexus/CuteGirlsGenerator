@@ -49,8 +49,6 @@ function generate2() { //Added by mirukuma
       // outputData['fc1000']
       generatedData=outputData.output;
       console.log(generatedData);
-      cont.clearRect(0,0,128,128);
-      cont.drawImageByDada(generatedData,24,40,0,7,0,0); // test code Added by JPNYKW
     })
     .catch(err => {
       console.log(err)
