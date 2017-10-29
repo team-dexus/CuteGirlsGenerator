@@ -3,8 +3,8 @@ from keras.layers import Dense
 from keras.layers import Reshape
 from keras.layers.core import Activation
 from keras.layers.normalization import BatchNormalization
-from keras.layers.convolutional import UpSampling3D
-from keras.layers.convolutional import Conv3D, MaxPooling3D
+from keras.layers.convolutional import UpSampling3D,UpSampling2D
+from keras.layers.convolutional import Conv3D, MaxPooling3D ,Conv2D, MaxPooling2D
 from keras.layers.core import Flatten,Dropout
 from keras.optimizers import Adam
 from keras.layers.advanced_activations import LeakyReLU
@@ -27,23 +27,25 @@ def generator_model(width,height):
     model.add(Activation('tanh'))
     model.add(Dense(width*height))
     model.add(Activation('tanh'))
-    model.add(Dense(width*height*DIM))
+    model.add(Dense(width*height*4))
     model.add(Activation('tanh'))
-    model.add(Dense(2*width*height*DIM))
+    model.add(Dense(width*height*64))
+    model.add(BatchNormalization())
     model.add(Activation('tanh'))
-    model.add(Dense(4*width*height*DIM))
-    model.add(Activation('tanh'))
-    model.add(Reshape((height, width, DIM, 4), input_shape=(4*width*height*DIM,)))
+    model.add(Reshape((height, width,64), input_shape=(width*height*64,)))
     model.add(Dropout(0.5))
-    model.add(UpSampling3D(size=(2, 2, 1)))
-    model.add(Conv3D(4, (2, 2, 1), padding='same'))
+    model.add(UpSampling2D(size=(2, 2)))
+    model.add(Conv2D(128, (2, 2), padding='same'))
     model.add(BatchNormalization())
     model.add(Activation('tanh'))
-    model.add(UpSampling3D(size=(2, 2, 1)))
-    model.add(Conv3D(2, (2, 2, 1), padding='same'))
+    model.add(Conv2D(32, (2, 2), padding='same'))
     model.add(BatchNormalization())
     model.add(Activation('tanh'))
-    model.add(Conv3D(1, (2, 2, 1), padding='same'))
+    model.add(UpSampling2D(size=(2, 2)))
+    model.add(Conv2D(16, (2, 2), padding='same'))
+    model.add(BatchNormalization())
+    model.add(Activation('tanh'))
+    model.add(Conv2D(DIM, (2, 2), padding='same'))
     model.add(Activation('tanh'))
     return model
 
@@ -51,21 +53,25 @@ def generator_model(width,height):
 def discriminator_model(width,height):
     model = Sequential()
     model.add(
-            Conv3D(16, (5, 5, 5),
+            Conv2D(16, (5, 5),
             padding='same',
-            input_shape=(height, width, DIM, 1))
+            input_shape=(height, width, DIM))
             )
     model.add(LeakyReLU(0.2))
-    model.add(MaxPooling3D(pool_size=(2, 2, 1)))
-    model.add(Conv3D(32, (5, 5, 1)))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Conv2D(32, (5, 5),padding='same'))
     model.add(LeakyReLU(0.2))
-    model.add(BatchNormalization())
-    model.add(MaxPooling3D(pool_size=(2, 2, 1)))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(LeakyReLU(0.2))
+    model.add(Conv2D(128, (5, 5),padding='same'))
+    model.add(LeakyReLU(0.2))
     model.add(Flatten())
+    model.add(LeakyReLU(0.2))
+    model.add(Dense(2048))
+    model.add(LeakyReLU(0.2))
     model.add(Dense(256))
     model.add(LeakyReLU(0.2))
-    model.add(Dense(64))
-    model.add(LeakyReLU(0.2))
+    model.add(Dropout(0.5))
     model.add(Dense(1))
     model.add(Activation('sigmoid'))
     return model
@@ -150,7 +156,7 @@ def train(width,height):
             noise = np.array([np.random.uniform(-1, 1, 100) for _ in range(BATCH_SIZE)])
             image_batch = X_train[index*BATCH_SIZE:(index+1)*BATCH_SIZE]
             generated_images = g.predict(noise, verbose=1)
-            generated_images=generated_images.reshape(generated_images.shape[0:4])
+            #generated_images=generated_images.reshape(generated_images.shape[0:4])
             # 生成画像を出力
             
             if index==0:
@@ -164,7 +170,7 @@ def train(width,height):
             print(image_batch.shape)
             print(generated_images.shape)
             X = np.concatenate((image_batch, generated_images))
-            X=X.reshape(X.shape+(1,))
+            #X=X.reshape(X.shape+(1,))
             y = [1]*BATCH_SIZE+[0]*BATCH_SIZE
             if 1>g_loss-d_loss:
                 d_loss = d.train_on_batch(X, y)
@@ -194,7 +200,7 @@ def generate_test_image(image_name):
         
     noise = np.array([np.random.uniform(-1, 1, 100) for _ in range(BATCH_SIZE)])
     generated_images = g.predict(noise, verbose=1)
-    generated_images=generated_images.reshape(generated_images.shape[0:4])
+    #generated_images=generated_images.reshape(generated_images.shape[0:4])
     generated_images=generated_images*127.5+127.5
     save_generated_image(generated_images,image_name)
     generated_images=(generated_images-127.5)/127.5
