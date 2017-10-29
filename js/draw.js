@@ -15,3 +15,8 @@ CanvasRenderingContext2D.prototype.drawImageByDada=function($Array,$width,$heigh
 	}
 	console.log($idx);
 }
+
+function drawGeneratedImage(){
+      cont.clearRect(0,0,canv.width,canv.height);
+      cont.drawImageByDada(generatedData,24,40,0,7,0,0); // test code
+}
