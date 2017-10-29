@@ -47,7 +47,8 @@ function generate2() { //Added by mirukuma
       // or `output` for Sequential models
       // e.g.,
       // outputData['fc1000']
-      console.log(outputData)
+      generatedData=outputData.output;
+      console.log(generatedData);
       //cont.drawImageByDada(outputData,24,40,0,2,0,0); // test code Added by JPNYKW
     })
     .catch(err => {
