@@ -9,6 +9,7 @@
 
 学習したモデルをWebDNNで動くようにする方法(WebGPU)
     1.下記のコードを実行。
+    
     g = generator_model(round(24/4),round(40/4))
     g.load_weights('generator.h5')
 
