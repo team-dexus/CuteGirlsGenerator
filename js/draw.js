@@ -1,3 +1,5 @@
+var wid=24,hig=40; // for draw engine
+
 CanvasRenderingContext2D.prototype.drawImageByData=function($Array,$width,$height,$find,$px,$x,$y){
 	let $dy=$y;
 	let $idx=$find;
@@ -21,5 +23,5 @@ CanvasRenderingContext2D.prototype.drawImageByData=function($Array,$width,$heigh
 
 function drawGeneratedImage(){
       cont.clearRect(0,0,canv.width,canv.height);
-      cont.drawImageByData(generatedData,24,40,0,7,0,0); // test code
+      cont.drawImageByData(generatedData,wid,hig,0,7,0,0); // test code
 }
