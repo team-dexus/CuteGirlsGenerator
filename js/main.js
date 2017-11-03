@@ -33,6 +33,6 @@ function textRoll(text,target,interval,subtarget,afterInput){
 
 function setImgSize(){
 	wid=~~w.value;
-	hig=~~h.valuel
+	hig=~~h.value;
 	console.log([w,h]); // test
 }
