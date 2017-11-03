@@ -8,13 +8,13 @@ var generatedData; // generate2() の戻り値を格納する変数
 window.onload=()=>{
 	canv=d.getElementById('output');
 	cont=canv.getContext('2d');
-	
+
 	w=d.getElementById('w');
 	h=d.getElementById('h');
-	
+
 	canv.width=164;
 	canv.height=200;
-	
+
 	textRoll('-Generate ultimate cute girls-',d.getElementById('display'),50
 		 ,d.getElementById('shel'),'<h1>-Generate <span class="text">ultimate cute</span> girls.-</h1>');
 }
