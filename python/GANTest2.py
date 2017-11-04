@@ -32,20 +32,22 @@ def generator_model(width,height):
     model.add(Dense(width*4*height*4*4))
     model.add(BatchNormalization())
     model.add(Activation('tanh'))
+    
     model.add(Reshape((height*4, width*4,4), input_shape=(width*4*height*4*4,)))
+    
     #model.add(Dropout(0.5))
     #model.add(UpSampling2D(size=(2, 2)))
-    model.add(Conv2D(128, (2, 2), padding='same'))
+    model.add(Conv2D(128, (3, 3), padding='same'))
     model.add(BatchNormalization())
     model.add(Activation('tanh'))
-    model.add(Conv2D(32, (2, 2), padding='same'))
+    model.add(Conv2D(32, (3, 3), padding='same'))
     model.add(BatchNormalization())
     model.add(Activation('tanh'))
     #model.add(UpSampling2D(size=(2, 2)))
-    model.add(Conv2D(16, (2, 2), padding='same'))
+    model.add(Conv2D(16, (3, 3), padding='same'))
     model.add(BatchNormalization())
     model.add(Activation('tanh'))
-    model.add(Conv2D(DIM, (2, 2), padding='same'))
+    model.add(Conv2D(DIM, (3, 3), padding='same'))
     model.add(Activation('tanh'))
     return model
 

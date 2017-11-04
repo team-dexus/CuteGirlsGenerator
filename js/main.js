@@ -12,8 +12,8 @@ window.onload=()=>{
 	w=d.getElementById('w');
 	h=d.getElementById('h');
 
-	canv.width=164;
-	canv.height=200;
+	canv.width=168;
+	canv.height=280;
 
 	textRoll('-Generate ultimate cute girls-',d.getElementById('display'),50
 		 ,d.getElementById('shel'),'<h1>-Generate <span class="text">ultimate cute</span> girls.-</h1>');

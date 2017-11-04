@@ -1,10 +1,10 @@
 var wid=24,hig=40; // for draw engine
 
 CanvasRenderingContext2D.prototype.drawImageByData=function($Array,$width,$height,$find,$px,$x,$y){
-	let $dy=$y;
+	let $dy=$y+$px/2;
 	let $idx=$find;
 	for($hc=0;$hc<$height;$hc++){
-		let $dx=$x;
+		let $dx=$x+$px/2;
 		for($wc=0;$wc<$width;$wc++){
 			let R=$Array[$idx+0]*127.5+127.5;
 			let G=$Array[$idx+1]*127.5+127.5;
