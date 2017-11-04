@@ -78,3 +78,6 @@ youkaiwatch
 ## To use python in javascript code  
 
 >Coming soon
+
+## License
+>This software is released under the MIT License, see LICENSE.txt.
