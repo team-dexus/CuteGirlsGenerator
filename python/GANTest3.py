@@ -1,5 +1,6 @@
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.models import Model
+from keras.layers import Dense ,Input
 from keras.layers import Reshape
 from keras.layers.core import Activation
 from keras.layers.normalization import BatchNormalization
@@ -15,69 +16,80 @@ import os
 import numpy as np
 import glob
 from PIL import Image
+import pickle
+
+import sys
+sys.path.append("/Users/KOKI/PerfectMakeGirls/python/i2v")
+import i2v
+
+
 TRAIN_IMAGE_PATH="/Users/KOKI/Documents/TrainData3/*" 
 GENERATED_IMAGE_PATH="/Users/KOKI/Documents/Generated/" 
 BATCH_SIZE = 200
 NUM_EPOCH = 10
 DIM=3
+NUMBER_OF_TAG=1539
+'''
+try:
+    with open('illust2vec.pickle', 'r') as f:
+        illust2vec = pickle.load(f)
+except:
+    illust2vec = i2v.make_i2v_with_chainer(
+    "./i2v/illust2vec_tag_ver200.caffemodel", "./i2v/tag_list.json")
+    with open('illust2vec.pickle', 'wb') as f:
+        pickle.dump(illust2vec,f)
+'''
+    
 
 def generator_model(width,height):
-    model = Sequential()
-    model.add(Dense(input_dim=100, output_dim=128,bias_initializer='he_uniform'))
-    model.add(Activation('tanh'))
-    model.add(Dense(width*height))
-    model.add(Activation('tanh'))
-    model.add(Dense(width*height*4))
-    model.add(Activation('tanh'))
-    model.add(Dense(width*height*64))
-    
-    model.add(Activation('tanh'))
-    model.add(BatchNormalization())
-    model.add(Reshape((height, width,64), input_shape=(width*height*64,)))
-    model.add(Dropout(0.5))
-    model.add(UpSampling2D(size=(2, 2)))
-    model.add(Conv2D(128, (2, 2), padding='same'))
-    
-    model.add(Activation('tanh'))
-    model.add(BatchNormalization())
-    model.add(Conv2D(32, (2, 2), padding='same'))
-    
-    model.add(Activation('tanh'))
-    model.add(BatchNormalization())
-    model.add(UpSampling2D(size=(2, 2)))
-    model.add(Conv2D(16, (2, 2), padding='same'))
-    
-    model.add(Activation('tanh'))
-    model.add(BatchNormalization())
-    model.add(Conv2D(DIM, (2, 2), padding='same'))
-    model.add(Activation('tanh'))
+    noise = Input(shape=(100,))
+    x = Dense(input_dim=100, output_dim=128,bias_initializer='he_uniform')(noise)
+    x = Activation('tanh')(x)
+    x = Dense(width*height)(x)
+    x = Activation('tanh')(x)
+    x = Dense(width*height*4)(x)
+    x = Activation('tanh')(x)
+    x = Dense(width*4*height*4*4)(x)
+    x = BatchNormalization()(x)
+    x = Activation('tanh')(x)
+    x = Reshape((height*4, width*4,4), input_shape=(width*4*height*4*4,))(x)
+    x = Conv2D(128, (3, 3), padding='same')(x)
+    x = BatchNormalization()(x)
+    x = Activation('tanh')(x)
+    x = Conv2D(32, (3, 3), padding='same')(x)
+    x = BatchNormalization()(x)
+    x = Activation('tanh')(x)
+    x = Conv2D(16, (3, 3), padding='same')(x)
+    x = BatchNormalization()(x)
+    x = Activation('tanh')(x)
+    x = Conv2D(DIM, (3, 3), padding='same')(x)
+    output = Activation('tanh')(x)
+    model = Model(inputs=noise, outputs=output)
     return model
 
 
 def discriminator_model(width,height):
-    model = Sequential()
-    model.add(
-            Conv2D(16, (5, 5),
-            padding='same',
-            input_shape=(height, width, DIM))
-            )
-    model.add(LeakyReLU(0.2))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Conv2D(32, (5, 5),padding='same'))
-    model.add(LeakyReLU(0.2))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(LeakyReLU(0.2))
-    model.add(Conv2D(128, (5, 5),padding='same'))
-    model.add(LeakyReLU(0.2))
-    model.add(Flatten())
-    model.add(LeakyReLU(0.2))
-    model.add(Dense(2048))
-    model.add(LeakyReLU(0.2))
-    model.add(Dense(256))
-    model.add(LeakyReLU(0.2))
-    model.add(Dropout(0.5))
-    model.add(Dense(1))
-    model.add(Activation('sigmoid'))
+    illust=Input(shape=(height,width,DIM,))
+    x = Conv2D(16, (5, 5), padding='same' , input_shape=(height, width, DIM))(illust)
+    x = LeakyReLU(0.2)(x)
+    x = MaxPooling2D(pool_size=(2, 2))(x)
+    x = Conv2D(32, (5, 5),padding='same')(x)
+    x = LeakyReLU(0.2)(x)
+    x = MaxPooling2D(pool_size=(2, 2))(x)
+    x = LeakyReLU(0.2)(x)
+    x = Conv2D(128, (5, 5),padding='same')(x)
+    x = LeakyReLU(0.2)(x)
+    x = Flatten()(x)
+    x = LeakyReLU(0.2)(x)
+    x = Dense(2048)(x)
+    x = LeakyReLU(0.2)(x)
+    x = Dense(256)(x)
+    x = LeakyReLU(0.2)(x)
+    x = Dropout(0.5)(x)
+    x = Dense(1)(x)
+    output = Activation('sigmoid')(x)
+    model = Model(inputs=illust, outputs=output)
+    
     return model
     
 def data_import(width,height):
@@ -91,9 +103,21 @@ def data_import(width,height):
         #im_reading = im_reading.transpose(1,0,2)
         print(i)
         image = np.append(image, [im_reading], axis=0)
+
+    batch_size=5
+    estimated_tags=np.zeros((0,NUMBER_OF_TAG))
+
+    for i in range(math.floor(len(image)/batch_size+1)):
+        print(str(i)+"/"+str(math.floor(len(image)/batch_size+1)))
+        if len(image)<batch_size*(i+1):
+            batch=np.array(image[batch_size*i:])
+        else:
+            batch=np.array(image[batch_size*i:batch_size*(i+1)])
+        print(estimated_tags.shape)
         
-        
-    return image
+        estimated_tags=np.append(estimated_tags,illust2vec.extract_feature(batch),axis=0) 
+
+    return estimated_tags
 
 def combine_images(generated_images):
     total = generated_images.shape[0]
@@ -201,14 +225,21 @@ def generate_test_image(image_name):
         g.load_weights('generator.h5')
     except:
         print("generator couldn't load")
+     
+    d = discriminator_model(24,40)
+    try:
+        d.load_weights('discriminator.h5')
+    except:
+        print("discriminator couldn't load")
         
     noise = np.array([np.random.uniform(-1, 1, 100) for _ in range(BATCH_SIZE)])
     generated_images = g.predict(noise, verbose=1)
+    loss=d.predict(generated_images)
     #generated_images=generated_images.reshape(generated_images.shape[0:4])
     generated_images=generated_images*127.5+127.5
     save_generated_image(generated_images,image_name)
     generated_images=(generated_images-127.5)/127.5
-    return generated_images
+    return loss
     
 
 #train(24,40)

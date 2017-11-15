@@ -15,11 +15,29 @@ import os
 import numpy as np
 import glob
 from PIL import Image
+import pickle
+
+import sys
+sys.path.append("/Users/KOKI/PerfectMakeGirls/python/i2v")
+import i2v
+
+
 TRAIN_IMAGE_PATH="/Users/KOKI/Documents/TrainData3/*" 
 GENERATED_IMAGE_PATH="/Users/KOKI/Documents/Generated/" 
 BATCH_SIZE = 200
 NUM_EPOCH = 10
 DIM=3
+NUMBER_OF_TAG=1539
+
+try:
+    with open('illust2vec.pickle', 'r') as f:
+        illust2vec = pickle.load(f)
+except:
+    illust2vec = i2v.make_i2v_with_chainer(
+    "./i2v/illust2vec_tag_ver200.caffemodel", "./i2v/tag_list.json")
+    with open('illust2vec.pickle', 'wb') as f:
+        pickle.dump(illust2vec,f)
+    
 
 def generator_model(width,height):
     model = Sequential()
@@ -89,9 +107,21 @@ def data_import(width,height):
         #im_reading = im_reading.transpose(1,0,2)
         print(i)
         image = np.append(image, [im_reading], axis=0)
+
+    batch_size=5
+    estimated_tags=np.zeros((0,NUMBER_OF_TAG))
+
+    for i in range(math.floor(len(image)/batch_size+1)):
+        print(str(i)+"/"+str(math.floor(len(image)/batch_size+1)))
+        if len(image)<batch_size*(i+1):
+            batch=np.array(image[batch_size*i:])
+        else:
+            batch=np.array(image[batch_size*i:batch_size*(i+1)])
+        print(estimated_tags.shape)
         
-        
-    return image
+        estimated_tags=np.append(estimated_tags,illust2vec.extract_feature(batch),axis=0) 
+
+    return estimated_tags
 
 def combine_images(generated_images):
     total = generated_images.shape[0]
@@ -199,14 +229,21 @@ def generate_test_image(image_name):
         g.load_weights('generator.h5')
     except:
         print("generator couldn't load")
+     
+    d = discriminator_model(24,40)
+    try:
+        d.load_weights('discriminator.h5')
+    except:
+        print("discriminator couldn't load")
         
     noise = np.array([np.random.uniform(-1, 1, 100) for _ in range(BATCH_SIZE)])
     generated_images = g.predict(noise, verbose=1)
+    loss=d.predict(generated_images)
     #generated_images=generated_images.reshape(generated_images.shape[0:4])
     generated_images=generated_images*127.5+127.5
     save_generated_image(generated_images,image_name)
     generated_images=(generated_images-127.5)/127.5
-    return generated_images
+    return loss
     
 
 #train(24,40)
