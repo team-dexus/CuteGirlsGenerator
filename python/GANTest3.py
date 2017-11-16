@@ -103,19 +103,33 @@ def data_import(width,height):
         #im_reading = im_reading.transpose(1,0,2)
         print(i)
         image = np.append(image, [im_reading], axis=0)
-
-    batch_size=5
-    estimated_tags=np.zeros((0,NUMBER_OF_TAG))
-
-    for i in range(math.floor(len(image)/batch_size+1)):
-        print(str(i)+"/"+str(math.floor(len(image)/batch_size+1)))
-        if len(image)<batch_size*(i+1):
-            batch=np.array(image[batch_size*i:])
-        else:
-            batch=np.array(image[batch_size*i:batch_size*(i+1)])
-        print(estimated_tags.shape)
         
-        estimated_tags=np.append(estimated_tags,illust2vec.extract_feature(batch),axis=0) 
+    try:
+        with open('tags.pickle', 'rb') as f:
+            estimated_tags = pickle.load(f)
+        
+    except:
+        
+        try:
+            with open('illust2vec.pickle', 'r') as f:
+                illust2vec = pickle.load(f)
+        except:
+            illust2vec = i2v.make_i2v_with_chainer(
+            "./i2v/illust2vec_tag_ver200.caffemodel", "./i2v/tag_list.json")
+            with open('illust2vec.pickle', 'wb') as f:
+                pickle.dump(illust2vec,f)
+        
+        batch_size=5
+        estimated_tags=np.zeros((0,NUMBER_OF_TAG))
+        for i in range(math.floor(len(image)/batch_size+1)):
+            print(str(i)+"/"+str(math.floor(len(image)/batch_size+1)))
+            if len(image)<batch_size*(i+1):
+                batch=np.array(image[batch_size*i:])
+            else:
+                batch=np.array(image[batch_size*i:batch_size*(i+1)])
+            print(estimated_tags.shape)
+            
+            estimated_tags=np.append(estimated_tags,illust2vec.extract_feature(batch),axis=0) 
 
     return estimated_tags
 
