@@ -12,7 +12,7 @@ WebDNNのセットアップは済んでるものとします。済んでいな�
     from webdnn.frontend.keras import KerasConverter
     from webdnn.backend import generate_descriptor
 
-    graph = KerasConverter(batch_size=1).convert(model)
+    graph = KerasConverter(batch_size=1).convert(g)
     exec_info = generate_descriptor("webgpu", graph)  # also "webassembly", "webgl", "fallback" are available.
     exec_info.save("./output")
     
