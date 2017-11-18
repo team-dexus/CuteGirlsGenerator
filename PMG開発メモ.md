@@ -25,13 +25,6 @@ WebDNNのセットアップは済んでるものとします。済んでいな�
 あと、WebDNNで複数入力可能か未検証。できなかったら申し訳ない（多分できると思うが）
 
 # python関連
-## タグに関して
-通常はpythonフォルダのtags.pickleを読み込む。
-また、画像を追加・変更、また、学習する解像度を上げる場合は。
-https://drive.google.com/open?id=1H4kRNrfNypMWCPcTodp9RR5W0EzctXsS  
-ここのillust2vec_tag_ver200.caffemodelを/python/i2vに置くか
-illust2vec.pickleを/pythonに置くか（こちらの方が早い......?)すれば、タグ推論を新たに行うことができる。
-
 ## モデルに関して
 mirukumaははっきり言ってディープラーニングのことをほとんど知らない。
 論文とかも一応読んで見たが全然わからなかった（）
@@ -39,6 +32,13 @@ mirukumaははっきり言ってディープラーニングのことをほとん
 
 それとディープラーニングは"学問"のレベルに達していないような気がしている（全くの見当違いかもしれないが）
 だから、色々モデルを変えて見て、実験するのが最適なのかもしれない
+
+## タグに関して
+通常はpythonフォルダのtags.pickleを読み込む。
+また、画像を追加・変更、また、学習する解像度を上げる場合は。
+https://drive.google.com/open?id=1H4kRNrfNypMWCPcTodp9RR5W0EzctXsS  
+ここのillust2vec_tag_ver200.caffemodelを/python/i2vに置くか
+illust2vec.pickleを/pythonに置くか（こちらの方が早い......?)すれば、タグ推論を新たに行うことができる。
 
 ## 学習元画像に関して
 今までは、透化pngの一人立ち絵に限定して学習させていたが、タグ付けの実装で、もはやその必要は無くなったかもしれないし、無くなってないかもしれない。  
