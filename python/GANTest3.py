@@ -1,7 +1,7 @@
 from keras.models import Sequential
 from keras.models import Model
 from keras.layers import Dense ,Input
-from keras.layers import Reshape
+from keras.layers import Reshape,concatenate
 from keras.layers.core import Activation
 from keras.layers.normalization import BatchNormalization
 from keras.layers.convolutional import UpSampling3D,UpSampling2D
@@ -43,28 +43,36 @@ except:
 
 def generator_model(width,height):
     noise = Input(shape=(100,))
+    tags_input = Input(shape=(NUMBER_OF_TAG,))
+    tags = Dense(input_dim=NUMBER_OF_TAG, output_dim=128,bias_initializer='he_uniform')(tags_input)
+    tags = LeakyReLU(0.2)(tags)
+    tags = Dense(128)(tags)
+    tags = LeakyReLU(0.2)(tags)
+    tags = Dense(width*height)(tags)
+    tags = LeakyReLU(0.2)(tags)
     x = Dense(input_dim=100, output_dim=128,bias_initializer='he_uniform')(noise)
-    x = Activation('tanh')(x)
+    x = LeakyReLU(0.2)(x)
     x = Dense(width*height)(x)
-    x = Activation('tanh')(x)
+    x = LeakyReLU(0.2)(x)
+    x = concatenate([x, tags])
     x = Dense(width*height*4)(x)
-    x = Activation('tanh')(x)
+    x = LeakyReLU(0.2)(x)
     x = Dense(width*4*height*4*4)(x)
     x = BatchNormalization()(x)
-    x = Activation('tanh')(x)
+    x = LeakyReLU(0.2)(x)
     x = Reshape((height*4, width*4,4), input_shape=(width*4*height*4*4,))(x)
     x = Conv2D(128, (3, 3), padding='same')(x)
     x = BatchNormalization()(x)
-    x = Activation('tanh')(x)
+    x = LeakyReLU(0.2)(x)
     x = Conv2D(32, (3, 3), padding='same')(x)
     x = BatchNormalization()(x)
-    x = Activation('tanh')(x)
+    x = LeakyReLU(0.2)(x)
     x = Conv2D(16, (3, 3), padding='same')(x)
     x = BatchNormalization()(x)
-    x = Activation('tanh')(x)
+    x = LeakyReLU(0.2)(x)
     x = Conv2D(DIM, (3, 3), padding='same')(x)
     output = Activation('tanh')(x)
-    model = Model(inputs=noise, outputs=output)
+    model = Model(inputs=[noise,tags_input], outputs=output)
     return model
 
 
@@ -83,12 +91,14 @@ def discriminator_model(width,height):
     x = LeakyReLU(0.2)(x)
     x = Dense(2048)(x)
     x = LeakyReLU(0.2)(x)
+    tag_output=Dense(1024)(x)
+    tag_output=Dense(NUMBER_OF_TAG)(tag_output)
     x = Dense(256)(x)
     x = LeakyReLU(0.2)(x)
     x = Dropout(0.5)(x)
     x = Dense(1)(x)
     output = Activation('sigmoid')(x)
-    model = Model(inputs=illust, outputs=output)
+    model = Model(inputs=illust, outputs=[output,tag_output])
     
     return model
     
@@ -107,17 +117,20 @@ def data_import(width,height):
     try:
         with open('tags.pickle', 'rb') as f:
             estimated_tags = pickle.load(f)
+            print("load from pickle")
         
     except:
         
         try:
-            with open('illust2vec.pickle', 'r') as f:
+            with open('illust2vec.pickle', 'rb') as f:
                 illust2vec = pickle.load(f)
+                print("pickle i2v")
         except:
             illust2vec = i2v.make_i2v_with_chainer(
             "./i2v/illust2vec_tag_ver200.caffemodel", "./i2v/tag_list.json")
             with open('illust2vec.pickle', 'wb') as f:
                 pickle.dump(illust2vec,f)
+            print("new i2v")
         
         batch_size=5
         estimated_tags=np.zeros((0,NUMBER_OF_TAG))
@@ -130,8 +143,11 @@ def data_import(width,height):
             print(estimated_tags.shape)
             
             estimated_tags=np.append(estimated_tags,illust2vec.extract_feature(batch),axis=0) 
+            
+        with open('tags.pickle', 'wb') as f:
+            pickle.dump(estimated_tags,f)
 
-    return estimated_tags
+    return image,estimated_tags
 
 def combine_images(generated_images):
     total = generated_images.shape[0]
@@ -162,7 +178,7 @@ def save_generated_image(image,name):
 
 def train(width,height):
     WIDTH,HEIGHT=width,height
-    X_train=data_import(WIDTH,HEIGHT)
+    X_train,tags=data_import(WIDTH,HEIGHT)
     X_train = (X_train.astype(np.float32) - 127.5)/127.5
     X_train = X_train.reshape(X_train.shape[0:4])
 
@@ -183,8 +199,14 @@ def train(width,height):
     except:
         print("discriminator couldn't load")
     
-   
-    dcgan = Sequential([g, d])
+    
+    noise=Input(shape=(100,))
+    tag=Input(shape=(NUMBER_OF_TAG,))
+    fake=g([noise,tag])
+    fake,estimated_tag=d(fake)
+    dcgan = Model(inputs=[noise,tag],outputs=[fake,estimated_tag])
+    #dcganモデルを作成
+    
     g_opt = Adam(lr=2e-4, beta_1=0.5)
     dcgan.compile(loss='binary_crossentropy', optimizer=g_opt)
 
@@ -197,12 +219,13 @@ def train(width,height):
         for index in range(num_batches):
             noise = np.array([np.random.uniform(-1, 1, 100) for _ in range(BATCH_SIZE)])
             image_batch = X_train[index*BATCH_SIZE:(index+1)*BATCH_SIZE]
-            generated_images = g.predict(noise, verbose=1)
+            tag_batch = tags[index*BATCH_SIZE:(index+1)*BATCH_SIZE]
+            generated_images = g.predict([noise,tag_batch], verbose=1)
+            
             #generated_images=generated_images.reshape(generated_images.shape[0:4])
             # 生成画像を出力
             
             if index==0:
-
                 generated_images=generated_images*127.5+127.5
                 save_generated_image(generated_images,"%04d_%04d.png" % (epoch, index))
                 generated_images=(generated_images-127.5)/127.5
@@ -213,14 +236,15 @@ def train(width,height):
             print(generated_images.shape)
             X = np.concatenate((image_batch, generated_images))
             #X=X.reshape(X.shape+(1,))
-            y = [1]*BATCH_SIZE+[0]*BATCH_SIZE
-            if 1>g_loss-d_loss:
-                d_loss = d.train_on_batch(X, y)
+            y = [np.array([1]*BATCH_SIZE+[0]*BATCH_SIZE),np.concatenate((tag_batch, tag_batch))]
+            #return y
+            #if 1>g_loss-d_loss:
+            d_loss = d.train_on_batch(X, y)
 
             # generatorを更新 
             noise = np.array([np.random.uniform(-1, 1, 100) for _ in range(BATCH_SIZE)])
-            g_loss = dcgan.train_on_batch(noise, [1]*BATCH_SIZE)
-            print("epoch: %d, batch: %d, g_loss: %f, d_loss: %f" % (epoch, index, g_loss, d_loss))
+            g_loss = dcgan.train_on_batch([noise,tag_batch], [np.array([1]*BATCH_SIZE),tag_batch])
+            print("epoch: %d, batch: %d, g_loss: %s, d_loss: %s" % (epoch, index, str(g_loss), str(d_loss)))
         
 
         
