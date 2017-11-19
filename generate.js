@@ -66,14 +66,28 @@ function generate2(){
          console.log('loaded');
          console.log(runner.backendName);
          let x = runner.getInputViews()[0];
+         let x2 = runner.getInputViews()[1];
          console.log(x)
          let y = runner.getOutputViews()[0];
 
          var noise= new Float32Array(100)
+
          for(i=0; i<100; i=i+1){
            noise[i]=Math.random()*2-1
          }
+
+         numberOfTag=1539
+
+         var tags= new Float32Array(numberOfTag)
+         /*
+         for(i=0; i<1539; i=i+1){
+           tags[i]=Math.random()*2-1
+         }
+         タグの指定
+         */
          x.set(noise);
+         x2.set(tags)
+         console.log(x)
          runner.run()
             .then(function() {
               console.log('finished');
