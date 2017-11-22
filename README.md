@@ -16,7 +16,9 @@ _<a href="http://make.girls.moe/#/">this</a> page._
 >In the future the project  
 >will be running on this site.  
 
-<img src="http://i.cubeupload.com/k6BJh4.jpg" title="PerfectMakeGirls">
+## Screeb shots
+<img src="https://snag.gy/uWLHm5.jpg" title="This is a new version!">
+<img src="http://i.cubeupload.com/k6BJh4.jpg" title="Old version">
 
 _Will be run on <a href="https://TeamPMG.github.io/PerfectMakeGirls/">this</a> page._
 
