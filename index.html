@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -14,32 +13,63 @@
 	<script src="generate.js"></script> <!--Added by mirukuma-->
 
 	<style> /*Added by JPNYKW*/
-		body{background:linear-gradient(-90deg,#FFD85B,#FC5BFF,#FF81CB);color:#FCFCFC;}
-		.text{color:#FFE66B;}
+		body{
+			background:linear-gradient(-90deg,#EAEAEA,#DBDBDB,#CECECE,#DFDFDF);
+			font-family:Mangal;
+			font-size:16px;
+			color:#222;
+		}
+		.text{
+			color:#FFE66B;
+		}
+		.logo{
+			width:570px;
+			font-size:40px;
+			font-family:Impact;
+			border:dashed 1px #222;
+		}
+		button{
+			font-family:Estrangelo Edessa;
+			background:rgba(0,0,0,0);
+			font-size:15px;
+			font-family:
+		}
+		canvas{
+			background:linear-gradient(-80deg,#FFD85B,#FCA972,#FC9BB0,#FF81CB);
+		}
+		.subtext{
+			font-family:Impact;
+			font-size:35px;
+		}
+
 	</style>
 	<link rel="shortcut icon" href="code087.png"><!--Added by JPNYKW-->
 </head>
 
 <body>
 	<center>
-		<span id="shel"><h1 id="display">-</h1></span><!--Added by JPNYKW-->
+		<span id="shel"><h1 id="display" class="logo">-Generate ultimate cute girls.-</h1></span><!--Added by JPNYKW-->
 
-		<p>We’ll make new system better than ‘<a target="_blank" href="http://make.girls.moe">Make Girls Moe</a>’.</p><!--Added by mirukuma,Changed by CSlash-->
-		<p>Cute girls will be a save the world. we think so much.</p><!--Added by JPNYKW-->
+		<span>We’ll make new system better than ‘<a target="_blank" href="http://make.girls.moe">Make Girls Moe</a>’.</span><br><!--Added by mirukuma,Changed by CSlash,Changed by JPNYKW-->
+		<span>Cute girls will be a save the world. we think so much.</span><!--Added by JPNYKW--><br><br>
 
+		<span class="subtext">IMAGE TAGS</span><br><!--Added by JPNYKW-->
 		<input id="words" value="幼女"/> <!--Added by mirukuma,Changed by JPNYKW-->
 		<button onclick="generate2()">Generate!</button><!--Added by mirukuma--><!--Changed by mirukuma--><br><!--Added by JPNYKW--><br>
 
-		WIDTH<br><!--Added by JPNYKW-->
-		<input id="w" value="24"/> <br><!--Added by JPNYKW-->
-		HEIGHT<br><!--Added by JPNYKW-->
-		<input id="h" value="40"/> <br><!--Added by JPNYKW-->
-		<button onclick="setImgSize()">Set image size</button><br><br><!--Added by JPNYKW-->
+		<div><!--Added by JPNYKW-->
+			<span class="subtext">SETTINGS</span><br><!--Added by JPNYKW-->
+			WIDTH<br><!--Added by JPNYKW-->
+			<input id="w" value="24"/> <br><!--Added by JPNYKW-->
+			HEIGHT<br><!--Added by JPNYKW-->
+			<input id="h" value="40"/> <br><!--Added by JPNYKW-->
+			<button onclick="setImgSize()">Set image size</button><br><br><!--Added by JPNYKW-->
 
-		<canvas id="output" width="128" height="128" style="background:linear-gradient(-90deg,#2FB1FC,#2ECFFC,#4CBDFF)"></canvas><!--Added by JPNYKW-->
+			<canvas id="output" width="128px" height="128px"></canvas><!--Added by JPNYKW-->
+		</div>
 
-		<br>&spades; Here is page of motion test. yet not finished.<!--Added by JPNYKW-->
-		<br>version beta 1.2<!--Added by JPNYKW-->
+		&spades; Here is page of motion test. yet not finished.<!--Added by JPNYKW-->
+		<br>Version : 1.2(Beta)<!--Added by JPNYKW-->
 	</center>
 </body>
 
