@@ -16,7 +16,7 @@ window.onload=()=>{
 	canv.height=280;
 
 	textRoll('-Generate ultimate cute girls-',d.getElementById('display'),50
-		 ,d.getElementById('shel'),'<h1>-Generate <span class="text">ultimate cute</span> girls.-</h1>');
+		 ,d.getElementById('shel'),'<h1 class="logo">-Generate <span class="text">ultimate cute</span> girls.-</h1>');
 }
 
 function textRoll(text,target,interval,subtarget,afterInput){
