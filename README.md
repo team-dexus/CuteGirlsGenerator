@@ -36,12 +36,30 @@ And, we are Scratcher.
 <img src="https://avatars2.githubusercontent.com/u/22993351?s=96&v=4" title="mirukuma(proposer)">  
 
 ```
-mirukuma(proposer)
+mirukuma
 14 years old
 ```
 
 <a href="https://github.com/mirukuma">GitHub</a>  
 <a href="https://scratch.mit.edu/users/mirukuma/"> Scratch</a>  
+
+#### Main activity
+* Construction of learning model (Images), Description of image related json etc.
+* And other, Python related person in charge.  
+
+<img src="https://avatars2.githubusercontent.com/u/31243896?s=96&v=4" title="youkaiwatch">  
+
+```
+youkaiwatch
+15 years old
+```
+
+<a href="https://github.com/JPNYKW">GitHub</a>  
+<a href="https://scratch.mit.edu/users/youkaiwatch/"> Scratch</a>  
+
+#### Main activity
+* Made a function to render generated images by Python with JavaScript.
+* Web page and JavaScript relations person in charge.
 
 <img src="https://avatars0.githubusercontent.com/u/31244102?s=96&v=4" title="CommandSlash017">  
 
@@ -53,25 +71,21 @@ CommandSlash017
 <a href="https://github.com/CommandSlash017">GitHub</a>  
 <a href="https://scratch.mit.edu/users/CommandSlash017/"> Scratch</a>  
 
+#### Main activity
+* Various fine modification etc. on the web page.
+
 <img src="https://avatars1.githubusercontent.com/u/17782888?s=96&v=4" title="rabosakaki">  
 
 ```
-rabosakaki
+rabosakaki(robot. came from 2020.)
 15 years old
 ```
 
 <a href="https://github.com/rabosakaki">GitHub</a>  
 <a href="https://scratch.mit.edu/users/rabosakaki/"> Scratch</a>  
 
-<img src="https://avatars2.githubusercontent.com/u/31243896?s=96&v=4" title="youkaiwatch">  
-
-```
-youkaiwatch
-15 years old
-```
-
-<a href="https://github.com/JPNYKW">GitHub</a>  
-<a href="https://scratch.mit.edu/users/youkaiwatch/"> Scratch</a>  
+#### Main activity
+* No activity
 
 - - -
 
