@@ -22,7 +22,7 @@ _<a href="http://make.girls.moe/#/">this</a> page._
 
 _Will be run on <a href="https://TeamPMG.github.io/PerfectMakeGirls/">this</a> page._
 
-Now, in this page can null generate.
+Now, in this page can generate images (24*40).
 
 - - -
 
