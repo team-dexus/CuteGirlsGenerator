@@ -1,5 +1,7 @@
 var onGenerated=false;
 var d=document;
+var c=console;
+var w=window;
 var m=Math;
 
 var w,h;
