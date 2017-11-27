@@ -15,7 +15,7 @@ function generate(){ //Added by mirukuma ,Changed by JPNYKW ,Changed by mirukuma
 
 /*
 function generate2() { //Added by mirukuma
-  const model = new KerasJS.Model({ //--Added by mirukuma
+  const model = new KerasJS.Model({ //Added by mirukuma
     filepaths: {
       model: './data/generator.json',
       weights: './data/generator_weights.buf',
@@ -60,6 +60,8 @@ function generate2() { //Added by mirukuma
 */
 // ES6(modern JavaScript) version
 function generate2(){
+  onGenerated=false; //Added by JPNYKW
+  console.log(onGenerated); //Added by JPNYKW
   console.log('generate2');
   WebDNN.load('./output')
      .then(function(runner){
@@ -92,9 +94,10 @@ function generate2(){
             .then(function() {
               console.log('finished');
               let y_typed_array = y.toActual();
-              console.log(y_typed_array)
-              generatedData=y_typed_array; // Added by JPNYKW
-              drawGeneratedImage();
+              console.log(y_typed_array);
+              generatedData=y_typed_array; //Added by JPNYKW
+              drawGeneratedImage(); //Added by JPNYKW
+              onGenerated=true; //Added by JPNYKW
             });
 
          // add your code here.
