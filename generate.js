@@ -1,13 +1,13 @@
 
 function generate(){ //Added by mirukuma ,Changed by JPNYKW ,Changed by mirukuma ,Changed by JPNYKW
-  var pic=document.getElementById('GirlPic');
+  var pic=d.getElementById('GirlPic');
   var item=['MG7.png','MG57.png','code100.png']
-  var text=document.getElementById('words').value;
-  var arrayRes=document.getElementById('ArrayResult');
+  var text=d.getElementById('words').value;
+  var arrayRes=d.getElementById('ArrayResult');
   var result='===WORDS===<br>';
   tag(text).forEach(function(e,i,a){result+=`<span id=res${i}>${e}</span><br>`});
-  document.getElementById('ShowText').textContent='Generation result in '+text;
-  document.getElementById('ArrayRes').innerHTML=`${result}=========`;
+  d.getElementById('ShowText').textContent='Generation result in '+text;
+  d.getElementById('ArrayRes').innerHTML=`${result}=========`;
   pic.src=item[~~(Math.random()*3)];
 
 
@@ -98,7 +98,7 @@ function generate2(){
               generatedData=y_typed_array; //Added by JPNYKW
               drawGeneratedImage(); //Added by JPNYKW
               onGenerated=true; //Added by JPNYKW
-              d.getElementById("download").href=d.getElementById("output").toDataURL()
+              d.getElementById("download").href=d.getElementById("output").toDataURL()  //Added by CS017
             });
 
          // add your code here.
