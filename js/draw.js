@@ -1,3 +1,5 @@
+//created by JPNYKW
+
 var wid=24,hig=40; // for draw engine
 
 CanvasRenderingContext2D.prototype.drawImageByData=function($Array,$width,$height,$find,$px,$x,$y){
@@ -16,12 +18,12 @@ CanvasRenderingContext2D.prototype.drawImageByData=function($Array,$width,$heigh
 		}
 		$dy+=$px;
 	}
-	// for debug
-	console.log(`id:${$idx}`);
-	console.log('Execution complete');
+	// debugger fpr console
+	c.log('%cDebug','color:#0093EF;font-weight:bold',`id:${$idx}`);
+	c.log('%cDebug %cSuccessful','color:#0093EF;font-weight:bold','color:#F53300;font-weight:bold','draw an Image');
 }
 
 function drawGeneratedImage(){
       cont.clearRect(0,0,canv.width,canv.height);
-      cont.drawImageByData(generatedData,wid,hig,0,7,0,0); // test code
+      cont.drawImageByData(generatedData,wid,hig,0,7,0,0);
 }
