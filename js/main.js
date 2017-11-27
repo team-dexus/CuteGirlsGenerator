@@ -1,3 +1,4 @@
+var onGenerated=false;
 var d=document;
 var m=Math;
 
