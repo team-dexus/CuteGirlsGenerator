@@ -1,4 +1,5 @@
-var onGenerated=false;
+var download,onGenerated=false;
+var fileIndex=-1;
 var d=document;
 var c=console;
 var w=window;
@@ -9,6 +10,7 @@ var canv,cont;
 var generatedData; // generate2() の戻り値を格納する変数
 
 window.onload=()=>{
+	download=d.getElementById("download");
 	canv=d.getElementById('output');
 	cont=canv.getContext('2d');
 
@@ -38,4 +40,9 @@ function setImgSize(){
 	wid=~~w.value;
 	hig=~~h.value;
 	console.log([w,h]); // test
+}
+
+function updateName(){
+	fileIndex++;
+	download.download=`PMG_${fileIndex}.png`;
 }
