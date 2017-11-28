@@ -19,6 +19,7 @@ CanvasRenderingContext2D.prototype.drawImageByData=function($Array,$width,$heigh
 		$dy+=$px;
 	}
 	// debugger fpr console
+	c.timeEnd();
 	c.log('%cDebug','color:#0093EF;font-weight:bold',`id:${$idx}`);
 	c.log('%cDebug %cSuccessful','color:#0093EF;font-weight:bold','color:#F53300;font-weight:bold','draw an Image');
 }
