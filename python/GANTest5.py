@@ -1,7 +1,7 @@
 from keras.models import Sequential
 from keras.models import Model
 from keras.layers import Dense ,Input
-from keras.layers import Reshape,multiply,add
+from keras.layers import Reshape,multiply,add,concatenate
 from keras.layers.core import Activation
 from keras.layers.normalization import BatchNormalization
 from keras.layers.convolutional import UpSampling3D,UpSampling2D
@@ -9,6 +9,9 @@ from keras.layers.convolutional import Conv3D, MaxPooling3D ,Conv2D, AveragePool
 from keras.layers.core import Flatten,Dropout
 from keras.optimizers import Adam
 from keras.layers.advanced_activations import LeakyReLU ,ELU
+import keras.backend as K
+from keras.losses import mean_squared_error
+from keras.preprocessing.image import ImageDataGenerator
 
 
 import math
@@ -26,7 +29,7 @@ import i2v
 TRAIN_IMAGE_PATH="/Users/KOKI/Documents/TrainData3/*" 
 GENERATED_IMAGE_PATH="/Users/KOKI/Documents/Generated/" 
 BATCH_SIZE = 10
-NUM_EPOCH = 10
+NUM_EPOCH = 1000
 DIM=3
 NUMBER_OF_TAG=1539
 '''
@@ -35,24 +38,26 @@ try:
         illust2vec = pickle.load(f)
 except:
     illust2vec = i2v.make_i2v_with_chainer(
-    "./i2v/illust2vec_tag_ver200.caffemodel", "./i2v/tag_list.json")
+    "./i2v/illust2vec_tag_ver200.caffemodel", "./i2v/tag_list.json")2
     with open('illust2vec.pickle', 'wb') as f:
         pickle.dump(illust2vec,f)
 '''
     
 
 def generator_model(width,height):#144:240
-    noise = Input(shape=(100,))
+    noise_input = Input(shape=(100,))
+    noise = Dense(100)(noise_input)
     tags_input = Input(shape=(NUMBER_OF_TAG,))
     tags = Dense(input_dim=NUMBER_OF_TAG, output_dim=100)(tags_input)
     tags = ELU()(tags)
-    x = multiply([noise, tags])
-    x = Dense(int(width/16*height/16*256),use_bias=False)(x)
+    x = concatenate([noise, tags])
+    x = Dense(100)(x)
     x = BatchNormalization()(x)
     x = ELU()(x)
-    x = Reshape((int(height/16),int(width/16),256), input_shape=(int(width/16*height/16*256),))(x)
+    x = Dense(int(width/16*height/16*128),use_bias=False)(x)
+    x = Reshape((int(height/16),int(width/16),128), input_shape=(int(width/16*height/16*128),))(x)
     
-
+   
     x = Conv2DTranspose(256, (3,3) ,strides=2,padding='same', use_bias=False,kernel_initializer='he_normal')(x)
     x = BatchNormalization()(x)
     x = ELU()(x)
@@ -68,42 +73,43 @@ def generator_model(width,height):#144:240
     
     x = Conv2DTranspose(DIM, (5,5) ,strides=1,padding='same',kernel_initializer='he_normal')(x)
     output = Activation('tanh')(x)
-    model = Model(inputs=[noise,tags_input], outputs=output)
+    model = Model(inputs=[noise_input,tags_input], outputs=output)
     
     return model
 
 
 def discriminator_model(width,height):
     illust=Input(shape=(height,width,DIM,))
-    x = Conv2D(DIM, (3, 3), padding='same' , input_shape=(height, width, DIM) ,kernel_initializer='he_normal',use_bias=False)(illust)
+    x = Conv2D(32, (7, 7), padding='same',kernel_initializer='he_normal',use_bias=False)(illust)
     x = ELU()(x)
     x = AveragePooling2D((2,2))(x)
-    x = Conv2D(32, (3, 3), padding='same',kernel_initializer='he_normal',use_bias=False)(x)
-    x = ELU()(x)
-    x = AveragePooling2D((2,2))(x)
-    x = Conv2D(64, (3, 3), padding='same',kernel_initializer='he_normal',use_bias=False)(x)
+    x = Conv2D(64, (5, 5), padding='same',kernel_initializer='he_normal',use_bias=False)(x)
+    x = BatchNormalization()(x)
     x = ELU()(x)
     x = AveragePooling2D((2,2))(x)
     x = Conv2D(128, (3, 3), padding='same' ,kernel_initializer='he_normal',use_bias=False)(x)
-    x = ELU()(x)
-    x = AveragePooling2D((2,2))(x)
-    x = Conv2D(128, (3, 3), padding='same' ,kernel_initializer='he_normal',use_bias=False)(x)
-    x = ELU()(x)
-    x = AveragePooling2D((2,2))(x)
-    x = Conv2D(256, (3, 3), padding='same' ,kernel_initializer='he_normal',use_bias=False)(x)
+    x = BatchNormalization()(x)
     x = ELU()(x)
     x = AveragePooling2D((2,2))(x)
     x = Conv2D(256, (3, 3), padding='same' ,kernel_initializer='he_normal',use_bias=False)(x)
+    x = BatchNormalization()(x)
     x = ELU()(x)
+    x = AveragePooling2D((2,2))(x)
+    x = Conv2D(256, (3, 3), padding='same' ,kernel_initializer='he_normal',use_bias=False)(x)
+    x = BatchNormalization()(x)
+    x = ELU()(x)
+    x = AveragePooling2D((2,2))(x)
     x = Flatten()(x)
     
     tag_output=Dense(NUMBER_OF_TAG,kernel_initializer='glorot_normal')(x)
     tag_output = Activation('sigmoid')(tag_output)
     x = Dense(1,kernel_initializer='glorot_normal')(x)
-    output = Activation('sigmoid')(x)
+    output = Activation('linear')(x)
     model = Model(inputs=illust, outputs=[output,tag_output])
     
     return model
+
+ 
     
 def data_import(width,height):
     try:
@@ -201,12 +207,21 @@ def save_generated_image(image,name):
 def train(width,height,test=False):
     WIDTH,HEIGHT=width,height
     X_train,tags=data_import(WIDTH,HEIGHT)
-    tags = tags
+    datagen = ImageDataGenerator(
+        rotation_range=5,
+        width_shift_range=0.01,
+        height_shift_range=0.01,
+        horizontal_flip=True)
+    datagen=datagen.flow(X_train,tags,batch_size=BATCH_SIZE)
+    save_generated_image(datagen.next()[0],"generated")
+    print("sex!")
+    '''
     X_train = (X_train.astype(np.float32) - 127.5)/127.5
     X_train = X_train.reshape(X_train.shape[0:4])
+    '''
 
     d = discriminator_model(WIDTH,HEIGHT)
-    d_opt = Adam(lr=1e-5, beta_1=0.1)
+    d_opt = Adam(lr=1e-4, beta_1=0.1)
     d.compile(loss='mean_squared_error', optimizer=d_opt)
 
     # generator+discriminator （discriminator部分の重みは固定）
@@ -240,10 +255,12 @@ def train(width,height,test=False):
     for epoch in range(NUM_EPOCH):
 
         for index in range(num_batches):
-            noise = np.array([np.random.uniform(-1, 1, 100) for _ in range(BATCH_SIZE)])
-            image_batch = X_train[index*BATCH_SIZE:(index+1)*BATCH_SIZE]
-            tag_batch = tags[index*BATCH_SIZE:(index+1)*BATCH_SIZE]
-            generated_images = g.predict([noise,tag_batch*2-1], verbose=1)
+            batch = datagen.next()
+            image_batch = (batch[0].astype(np.float32) - 127.5)/127.5
+            tag_batch = batch[1]
+            noise = np.random.normal(0, 0.5, [len(image_batch),100])
+            
+            generated_images = g.predict([noise,tag_batch], verbose=1)
             
             #generated_images=generated_images.reshape(generated_images.shape[0:4])
             # 生成画像を出力
@@ -259,15 +276,18 @@ def train(width,height,test=False):
             #print(generated_images.shape)
             X = np.concatenate((image_batch, generated_images))
             #X=X.reshape(X.shape+(1,))
-            y = [np.array([1]*BATCH_SIZE+[0]*BATCH_SIZE),np.concatenate((tag_batch, tag_batch))]
+            y = [np.array([1]*len(image_batch)+[0]*len(image_batch)),np.concatenate((tag_batch, tag_batch))]
             #return y
             #if 1>g_loss-d_loss:
             d_loss = d.train_on_batch(X, y)
 
             # generatorを更新 
-  
-            noise = np.array([np.random.uniform(-1, 1, 100) for _ in range(BATCH_SIZE)])
-            g_loss = dcgan.train_on_batch([noise,tag_batch*2-1], [np.array([1]*BATCH_SIZE),tag_batch])
+            print(len(image_batch))
+            noise = np.random.normal(0, 0.5, [len(image_batch),100])
+            test=dcgan.predict([noise,tag_batch])
+            g_loss = dcgan.train_on_batch([noise,tag_batch], [np.array([1]*len(image_batch)),tag_batch])
+            
+            print(test)
             print("epoch: %d, batch: %d, g_loss: %s, d_loss: %s" % (epoch, index, str(g_loss), str(d_loss)))
         
 
