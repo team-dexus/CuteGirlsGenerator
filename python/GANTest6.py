@@ -28,7 +28,7 @@ import i2v
 
 TRAIN_IMAGE_PATH="/Users/KOKI/Documents/TrainData3/*" 
 GENERATED_IMAGE_PATH="/Users/KOKI/Documents/Generated/" 
-BATCH_SIZE = 10
+BATCH_SIZE = 20
 NUM_EPOCH = 1000
 DIM=3
 NUMBER_OF_TAG=1539
@@ -42,7 +42,7 @@ except:
     with open('illust2vec.pickle', 'wb') as f:
         pickle.dump(illust2vec,f)
 '''
-    
+
 
 def generator_model(width,height):#144:240
     noise_input = Input(shape=(100,))
@@ -233,6 +233,7 @@ def train(width,height,test=False):
     datagen=datagen.flow(X_train,tags,batch_size=BATCH_SIZE)
     save_generated_image(datagen.next()[0],"generated")
     print("sex!")
+    
     '''
     X_train = (X_train.astype(np.float32) - 127.5)/127.5
     X_train = X_train.reshape(X_train.shape[0:4])
@@ -240,10 +241,12 @@ def train(width,height,test=False):
 
     d = discriminator_model(WIDTH,HEIGHT)
     d_opt = Adam(lr=1e-4, beta_1=0.5)
-    d.compile(loss='mean_squared_error', optimizer=d_opt)
+    d.compile(loss=mean_squared_error, optimizer=d_opt,metrics=["accuracy"])
 
-    # generator+discriminator （discriminator部分の重みは固定）
+
     d.trainable = False
+    for layer in d.layers:
+        layer.trainable = False
     g = generator_model(WIDTH,HEIGHT)
    
     try:
@@ -258,13 +261,13 @@ def train(width,height,test=False):
     
     noise=Input(shape=(100,))
     tag=Input(shape=(NUMBER_OF_TAG,))
-    fake=g([noise,tag])
-    fake=d([fake,tag])
+    gen=g([noise,tag])
+    fake=d([gen,tag])
     dcgan = Model(inputs=[noise,tag],outputs=fake)
     #dcganモデルを作成
     
     g_opt = Adam(lr=1e-4, beta_1=0.5)
-    dcgan.compile(loss='mean_squared_error', optimizer=g_opt)
+    dcgan.compile(loss=mean_squared_error, optimizer=g_opt,metrics=["accuracy"])
 
     num_batches = int(X_train.shape[0] / BATCH_SIZE)
     print('Number of batches:', num_batches)
@@ -273,9 +276,14 @@ def train(width,height,test=False):
     for epoch in range(NUM_EPOCH):
 
         for index in range(num_batches):
+
             batch = datagen.next()
             image_batch = (batch[0].astype(np.float32) - 127.5)/127.5
             tag_batch = batch[1]
+            '''
+            image_batch=X_train[index*BATCH_SIZE:(index+1)*BATCH_SIZE]
+            tag_batch=tags[index*BATCH_SIZE:(index+1)*BATCH_SIZE]
+            '''
             noise = np.random.normal(0, 0.5, [len(image_batch),100])
             
             generated_images = g.predict([noise,tag_batch], verbose=1)
@@ -294,18 +302,18 @@ def train(width,height,test=False):
             #print(generated_images.shape)
             X = np.concatenate((image_batch, generated_images))
             #X=X.reshape(X.shape+(1,))
-            y = np.array([1]*len(image_batch)+[0]*len(image_batch))
+            y = [1]*len(image_batch)+[0]*len(image_batch)
             #return y
             #if 1>g_loss-d_loss:
+
             d_loss = d.train_on_batch([X,np.concatenate((tag_batch, tag_batch))], y)
 
             # generatorを更新 
             print(len(image_batch))
             noise = np.random.normal(0, 0.5, [len(image_batch),100])
-            test=dcgan.predict([noise,tag_batch])
-            g_loss = dcgan.train_on_batch([noise,tag_batch], np.array([1]*len(image_batch)))
             
-            print(test)
+            g_loss = dcgan.train_on_batch([noise,tag_batch], [1]*len(image_batch))
+ 
             print("epoch: %d, batch: %d, g_loss: %s, d_loss: %s" % (epoch, index, str(g_loss), str(d_loss)))
         
 
