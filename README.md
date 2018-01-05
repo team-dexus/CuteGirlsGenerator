@@ -74,26 +74,7 @@ CommandSlash017
 #### Main activity
 * Various fine modification etc. on the web page.
 
-<img src="https://avatars1.githubusercontent.com/u/17782888?s=96&v=4" title="rabosakaki">  
-
-```
-rabosakaki(robot. came from 2020.)
-15 years old
-```
-
-<a href="https://github.com/rabosakaki">GitHub</a>  
-<a href="https://scratch.mit.edu/users/rabosakaki/"> Scratch</a>  
-
-#### Main activity
-* No activity
-
 - - -
-
-
-
-## To use python in javascript code  
-
->Coming soon
 
 ## License
 >This software is released under the MIT License, see LICENSE.txt.
