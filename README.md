@@ -1,4 +1,4 @@
-# PerfectMakeGirls
+# CuteGirlsGenerator
 
 ## What is the projects
 >Please check the site of "Make Girls Moe"  
@@ -20,7 +20,7 @@ _<a href="http://make.girls.moe/#/">this</a> page._
 <img src="https://snag.gy/uWLHm5.jpg" title="This is a new version!">
 <img src="http://i.cubeupload.com/k6BJh4.jpg" title="Old version">
 
-_Will be run on <a href="https://TeamPMG.github.io/PerfectMakeGirls/">this</a> page._
+_Will be run on <a href="https://TeamPMG.github.io/CuteGirlsGenerator/">this</a> page._
 
 Now, in this page can generate images (24*40).
 
