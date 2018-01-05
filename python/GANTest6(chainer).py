@@ -13,10 +13,10 @@ from PIL import Image
 
 from network import generator,discriminator
 
-TRAIN_IMAGE_PATH="/Users/KOKI/Documents/TrainData3/*" 
+TRAIN_IMAGE_PATH="/Users/KOKI/Documents/TrainData5/*" 
 GENERATED_IMAGE_PATH="/Users/KOKI/Documents/Generated/" 
 BATCH_SIZE = 10
-NUM_EPOCH = 1000
+NUM_EPOCH = 10
 DIM=3
 NUMBER_OF_TAG=1539
 
@@ -33,12 +33,12 @@ def check_accuracy(model, xs, ts):
 
 def data_import(width,height):
     try:
-        with open('images.pickle', 'rb') as f:
+        with open('images%d.pickle'%width, 'rb') as f:
             image = pickle.load(f)
             print("image load from pickle")
     except:
         image = np.empty((0,height,width,DIM), dtype=np.uint8)
-        list=glob.glob(TRAIN_IMAGE_PATH)
+        list=sorted(glob.glob(TRAIN_IMAGE_PATH))
         for i in list:
             im_reading = Image.open(i)
             im_reading .thumbnail((width, height),Image.ANTIALIAS)
@@ -68,7 +68,7 @@ def data_import(width,height):
             print(im_reading.shape)
             image = np.append(image, [im_reading], axis=0)
         
-            with open('images.pickle', 'wb') as f:
+            with open('images%d.pickle'%width, 'wb') as f:
                 pickle.dump(image,f) 
         print("new image")
     try:
@@ -131,53 +131,83 @@ def save_generated_image(image,name):
     Imag=combine_images(image)
     save_images(Imag,name)
 
-def train(width,height):
-    g = generator(width, height, 100)
+def train(width,height,depth):
+    g = generator(512, 512, 100)
+    try:
+        serializers.load_npz("generator.model", g)
+        print("generator loaded")
+    except:
+        pass
     d = discriminator()
+    try:
+        serializers.load_npz("discriminator.model", d)
+        print("discriminator loaded")
+    except:
+        pass
 
-    g_opt = chainer.optimizers.Adam()
+    g_opt = chainer.optimizers.Adam(alpha=0.001, beta1=0.0, beta2=0.99)
     g_opt.setup(g)
-    d_opt = chainer.optimizers.Adam()
+    g_opt.add_hook(chainer.optimizer.WeightDecay(0.0005))
+    
+    d_opt = chainer.optimizers.Adam(alpha=0.001, beta1=0.0, beta2=0.99)
     d_opt.setup(d)
+    d_opt.add_hook(chainer.optimizer.WeightDecay(0.0005))
 
-    X_train,tags=data_import(width,height)
+    X_train,tags=data_import(16*(2**depth),16*(2**depth))
+    '''
     X_train = (X_train.astype(np.float32) - 127.5)/127.5
     X_train = X_train.transpose(0,3,1,2)
+    '''
     print(X_train.shape)
     tags = tags.astype(np.float32)
 
 
     num_batches = int(X_train.shape[0] / BATCH_SIZE)
-    
-    for epoch in range(100):
+    alpha=0
+    for epoch in range(NUM_EPOCH):
 
         for index in range(num_batches):
+            if alpha<1:
+                alpha=alpha + 5e-4
             '''
             x = xs[(j * bm):((j + 1) * bm)]
             t = ts[(j * bm):((j + 1) * bm)]
             '''
             image_batch=X_train[index*BATCH_SIZE:(index+1)*BATCH_SIZE]
+            image_batch = (image_batch.astype(np.float32) - 127.5)/127.5
+            image_batch = image_batch.transpose(0,3,1,2)
             tag_batch=tags[index*BATCH_SIZE:(index+1)*BATCH_SIZE]
             
             noise=np.random.normal(0, 0.5, [len(image_batch),100])
             z = Variable(noise.astype(np.float32))
             
         
-            x = g(z,tag_batch)
-            if index==0:
+            x = g(z,tag_batch,depth,alpha)
+            if index%10==0:
                 generated_images=x.data*127.5+127.5
                 generated_images=generated_images.transpose(0,2,3,1)
                 save_generated_image(generated_images,"%04d_%04d.png" % (epoch, index))
-            print(x.shape)
-            yl = d(x,tag_batch)
-            print(yl.data)
 
-            g_loss=F.mean_squared_error(yl, Variable(np.ones((len(image_batch),1), dtype=np.float32)))
-            d_loss=F.mean_squared_error(yl, Variable(np.zeros((len(image_batch),1), dtype=np.float32)))
+            yl= d(x,tag_batch,depth,alpha)
+            #print(yl)
+            #g_loss=F.mean_squared_error(yl, Variable(np.ones((len(image_batch),1), dtype=np.float32)))
+            #d_loss=F.mean_squared_error(yl, Variable(np.zeros((len(image_batch),1), dtype=np.float32)))
+
+            yl2= d(image_batch,tag_batch,depth,alpha)
+            #print(yl2)
+            #d_loss+=F.mean_squared_error(yl2, Variable(np.ones((len(image_batch),1), dtype=np.float32)))
+            d_loss=-F.sum(yl2 - yl) / len(image_batch)
+            d_loss+=F.mean(0.001*yl*yl)
+            g_loss=-F.sum(yl) / len(image_batch)
+            '''
+            mean=F.mean(x,axis=0)
+            dev=x-F.broadcast_to(mean, x.shape)
+            devdev=dev*dev
+            var=F.mean(devdev)
             
-            yl2 = d(image_batch,tag_batch)
-            d_loss+=F.mean_squared_error(yl2, Variable(np.ones((len(image_batch),1), dtype=np.float32)))
-            print(yl2.data)
+            g_loss-= var
+            '''
+            
 
             g.cleargrads()
             g_loss.backward()
@@ -186,7 +216,7 @@ def train(width,height):
             d.cleargrads()
             d_loss.backward()
             d_opt.update()
-            print("epoch %d, batch: %d, g_loss: %f, d_loss: %f" %(epoch,index,g_loss.data,d_loss.data))
+            print("epoch %d, batch: %d, g_loss: %f, d_loss: %f, alpha: %f, depth: %d" %(epoch,index,g_loss.data,d_loss.data,alpha,depth))
         
         serializers.save_npz('generator.model', g)
         serializers.save_npz('discriminator.model', d)
@@ -196,5 +226,6 @@ def train(width,height):
 
 
 if __name__ == '__main__':
-    train(512,512)
+    for i in range(6):
+        train(512,512,i)
     print("sex")
