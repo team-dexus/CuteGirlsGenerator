@@ -41,8 +41,3 @@ function setImgSize(){
 	hig=~~h.value;
 	console.log([w,h]); // test
 }
-
-function updateName(){
-	fileIndex++;
-	download.download=`PMG_${fileIndex}.png`;
-}
