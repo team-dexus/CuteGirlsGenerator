@@ -98,11 +98,9 @@ function generate2(){
               generatedData=y_typed_array; //Added by JPNYKW
               drawGeneratedImage(); //Added by JPNYKW
               onGenerated=true; //Added by JPNYKW
-              download.href=d.getElementById("output").toDataURL()  //Added by CS017,Changed by JPNYKW
+              
             });
 
          // add your code here.
      });
-
-
 }
