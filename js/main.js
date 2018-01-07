@@ -41,3 +41,10 @@ function setImgSize(){
 	hig=~~h.value;
 	console.log([w,h]); // test
 }
+
+function downloadHandle(){
+	var DLImg=document.createElement("a")
+	DLImg.download="CGG.png"
+	DLImg.href=canv.toDataURL()
+	DLImg.click()
+}
