@@ -56,12 +56,13 @@ class generator(chainer.Chain):
         h = F.leaky_relu(h)
 
         h = F.reshape(h,(-1,256,int(self.height/32),int(self.width/32)))
-        
+
         for i in range(depth-1):
             h = getattr(self, "b%d" % i)(h)
+            print("b%d" % i)
         if 0<depth:
             h2 = getattr(self, "b%d" % (depth-1))(h)
-
+            print("b%d" % (depth-1))
             h=F.unpooling_2d(h, 2, 2, 0, outsize=(2*h.shape[2], 2*h.shape[3]))
             h=h*(1.0-alpha)+h2*alpha
         '''
@@ -74,7 +75,7 @@ class generator(chainer.Chain):
         
         
         h = F.tanh(self.to_RGB(h))
-        
+
         
         return h
     

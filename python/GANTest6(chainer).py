@@ -11,7 +11,9 @@ import glob
 import pickle
 from PIL import Image
 
-from network import generator,discriminator
+#from network import generator,discriminator
+from network2 import generator,discriminator
+
 
 TRAIN_IMAGE_PATH="/Users/KOKI/Documents/TrainData5/*" 
 GENERATED_IMAGE_PATH="/Users/KOKI/Documents/Generated/" 
@@ -131,7 +133,7 @@ def save_generated_image(image,name):
     Imag=combine_images(image)
     save_images(Imag,name)
 
-def train(width,height,depth):
+def train(width,height,depth,start_alpha=0):
     g = generator(512, 512, 100)
     try:
         serializers.load_npz("generator.model", g)
@@ -163,11 +165,11 @@ def train(width,height,depth):
 
 
     num_batches = int(X_train.shape[0] / BATCH_SIZE)
-    alpha=0
+    alpha=start_alpha
     for epoch in range(NUM_EPOCH):
 
         for index in range(num_batches):
-            if alpha<1:
+            if alpha<1.0:
                 alpha=alpha + 5e-4
             '''
             x = xs[(j * bm):((j + 1) * bm)]
@@ -226,6 +228,11 @@ def train(width,height,depth):
 
 
 if __name__ == '__main__':
-    for i in range(6):
-        train(512,512,i)
+    #start=3
+    #train(512,512,start,0.3)
+    start=0
+    for i in range(6-start):
+        train(512,512,i+start)
+    
+    
     print("sex")
