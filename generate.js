@@ -60,8 +60,9 @@ function generate2() { //Added by mirukuma
 */
 // ES6(modern JavaScript) version
 function generate2(){
+  d.getElementById("generate").setAttribute("disabled", true)
+  d.getElementById("download").setAttribute("disabled", true)
   onGenerated=false; //Added by JPNYKW
-  console.log(onGenerated); //Added by JPNYKW
   console.log('generate2');
   WebDNN.load('./output')
      .then(function(runner){
@@ -98,6 +99,8 @@ function generate2(){
               generatedData=y_typed_array; //Added by JPNYKW
               drawGeneratedImage(); //Added by JPNYKW
               onGenerated=true; //Added by JPNYKW
+              d.getElementById("generate").removeAttribute("disabled")
+              d.getElementById("download").removeAttribute("disabled")
               
             });
 
