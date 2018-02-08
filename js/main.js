@@ -37,10 +37,8 @@ function setImgSize() {
 }
 
 function downloadHandle() {
-	if (onGenerated) {
-		var DLImg = document.createElement("a")
-		DLImg.download = `CGG${++fileIndex}.png`
-		DLImg.href = canv.toDataURL()
-		DLImg.click()
-	}
+	var DLImg = document.createElement("a")
+	DLImg.download = `CGG${++fileIndex}.png`
+	DLImg.href = canv.toDataURL()
+	DLImg.click()
 }
