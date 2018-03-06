@@ -1,0 +1,1094 @@
+{
+  "kernel_source": "\ndnn_fallback_kernel={\n\n\nlinear: function(input_arrays, output_arrays, option) {\nvar x = input_arrays[0];\nvar w = input_arrays[1];\nvar y = output_arrays[0];\nvar m = option.m | 0;\nvar n = option.n | 0;\nvar k = option.k | 0;\nvar x_k_stride = option.x_k_stride | 0;\nvar x_m_stride = option.x_m_stride | 0;\nvar w_k_stride = option.w_k_stride | 0;\nvar w_n_stride = option.w_n_stride | 0;\n\nfor (var i = 0; i < m; i++) {\n  for (var j = 0; j < n; j++) {\n    var sum = 0.0;\n    for (var s = 0; s < k; s++) {\n      sum += x[i * x_m_stride + s * x_k_stride] * w[s * w_k_stride + j * w_n_stride];\n    }\n    y[i * n + j] = sum;\n  }\n}\n\n},\n\n\n\n\nelementwiseadd_a390ad2e078fc68ac251d2f594dc0f96834a1e57429714605dbf3a02: function(input_arrays, output_arrays, option) {\n    var v1 = input_arrays[0];\n    var v2 = input_arrays[1];\n    var v3 = input_arrays[2];\n    var D0 = option['7'];\n    var d0;\n    for (d0 = 0; d0 < D0; d0 += 1) {\n        var v4 = v1[d0];\n        var v5 = v2[d0];\n        var v6;\n        (function(){\n            v6 = v5 + v4;\n        })();\n        v3[d0] = v6;\n    }\n},\n\ntanh_5e10cc5f1018830bc540c7d2754d138b4faf2e5f6a49784e427a4db4: function(input_arrays, output_arrays, option) {\n    var v1 = input_arrays[0];\n    var v2 = input_arrays[1];\n    var D0 = option['5'];\n    var d0;\n    for (d0 = 0; d0 < D0; d0 += 1) {\n        var v3 = v1[d0];\n        var v4;\n        (function(){\n            v4 = Math.tanh(v3);\n        })();\n        v2[d0] = v4;\n    }\n},\n\nconcat: function(input_arrays, output_arrays, option) {\nvar xs = input_arrays;\nvar y = output_arrays[0];\nvar shapes = option.x_shapes;\nvar strides = option.x_strides;\nvar offsets = option.x_offsets;\nvar x;\nvar offset;\nvar stride;\nvar shape;\nvar position;\n\nfor (var i = 0; i < xs.length; i++) {\n    x = xs[i];\n    offset = offsets[i];\n    stride = strides[i];\n    shape = shapes[i];\n    position = [];\n    \n    for (var j = 0; j < shape.length; j++) {\n        position[j] = 0;\n    }\n    \n    do {\n        y[offset + dot(stride, position)] = get(x, shape, position);\n    } while (increment(shape, position))\n}\n\nfunction dot(a, b) {\n    var sum = 0;\n    for (var i = 0; i < a.length; i++) {\n        sum += a[i] * b[i];\n    }\n    return sum;\n}\n\nfunction get(x, shape, position) {\n    var i = 0;\n    for (var j = 0; j < shape.length; j++) {\n        i = (i * shape[j]) + position[j];\n    }\n    return x[i];\n}\n\nfunction increment(shape, position) {\n    var d = shape.length - 1;\n    position[d]++;\n    \n    while (position[d] === shape[d]) {\n        if (d == 0) return false;\n\n        position[d] -= shape[d];\n        d--;\n        position[d]++;\n    }\n    \n    return true;\n}\n\n},\n\n\nelementwisemul_f461891bf6151c1c8e19d27f04620fa161f4c4198372c1c58d4c1daf: function(input_arrays, output_arrays, option) {\n    var v1 = input_arrays[0];\n    var v2 = input_arrays[1];\n    var v3 = input_arrays[2];\n    var D0 = option['7'];\n    var d0;\n    for (d0 = 0; d0 < D0; d0 += 1) {\n        var v4 = v1[d0];\n        var v5 = v2[d0];\n        var v6;\n        (function(){\n            v6 = v5 * v4;\n        })();\n        v3[d0] = v6;\n    }\n},\n\nreshape: function(input_arrays, output_arrays, option) {\nvar x = input_arrays[0];\nvar y = output_arrays[0];\nvar length = option.length | 0;\n\nfor (var i = 0; i < length; i++) {\n  y[i] = x[i];\n}\n\n},\n\n\n\nconvolution_2d: function(input_arrays, output_arrays, option) {\nvar x = input_arrays[0];\nvar w = input_arrays[1];\nvar y = output_arrays[0];\nvar n = option.n | 0;\nvar in_spatial = option.in_spatial;\nvar out_spatial = option.out_spatial;\nvar out_size = option.out_size | 0;\nvar in_size = option.in_size | 0;\nvar padding = option.padding;\nvar stride = option.stride;\nvar ksize = option.ksize;\nvar dilation_rate = option.dilation_rate;\nvar strides_x = option.strides_x;\nvar strides_w = option.strides_w;\nvar strides_y = option.strides_y;\n\nvar get_x = function(n_, y_, x_, c_) {\n  y_ -= padding[0];\n  x_ -= padding[1];\n  if (y_ < 0 || y_ >= in_spatial[0] || x_ < 0 || x_ >= in_spatial[1]) {\n    return 0.0;\n  }\n  var idx = n_ * strides_x[0] + y_ * strides_x[1] + x_ * strides_x[2] + c_ * strides_x[3];\n  return x[idx];\n};\n\nvar get_w = function(ky_, kx_, in_c, out_c) {\n  var idx = out_c * strides_w[0] + ky_ * strides_w[1] + kx_ * strides_w[2] + in_c * strides_w[3];\n  return w[idx];\n};\n\nvar set_y = function(n_, y_, x_, c_, val) {\n  var idx = n_ * strides_y[0] + y_ * strides_y[1] + x_ * strides_y[2] + c_ * strides_y[3];\n  y[idx] = val;\n};\n\nfor (var batch = 0; batch < n; batch++) {\n  for (var oy = 0; oy < out_spatial[0]; oy++) {\n    for (var ox = 0; ox < out_spatial[1]; ox++) {\n      for (var oc = 0; oc < out_size; oc++) {\n        var sum = 0.0;\n        for (var ky = 0; ky < ksize[0]; ky++) {\n          for (var kx = 0; kx < ksize[1]; kx++) {\n            for (var ic = 0; ic < in_size; ic++) {\n              sum += get_x(batch, oy * stride[0] + ky * dilation_rate[0],\n                           ox * stride[1] + kx * dilation_rate[1],\n                           ic) *\n                     get_w(ky, kx, ic, oc);\n            }\n          }\n        }\n        set_y(batch, oy, ox, oc, sum);\n      }\n    }\n  }\n}\n\n},\n\n\n\nelementwisemul_189c2cd2099b07d9b26be17558d058dad850b3433e7038c72419880f: function(input_arrays, output_arrays, option) {\n    var v1 = input_arrays[0];\n    var v2 = input_arrays[1];\n    var v3 = input_arrays[2];\n    var v4 = option['7'];\n    var v5 = option['9'];\n    var D0 = option['11'];\n    var D1 = option['13'];\n    var d0;\n    for (d0 = ((1 > 8) ? (0 % (1 / 8)) : 0); d0 < D0; d0 += ((1 > 8) ? (1 / 8) : 1)) {\n        var v6 = v1[d0];\n        var d1;\n        for (d1 = ((1 > 8) ? (0 / (1 / 8)) : 0); d1 < D1; d1 += ((1 > 8) ? 8 : 1)) {\n            var v7 = v2[d0 + d1*v4];\n            var v8;\n            (function(){\n                v8 = v7 * v6;\n            })();\n            v3[d0 + d1*v5] = v8;\n        }\n    }\n},\n\nelementwiseadd_653f37079602765521bb5cca1b07d2b80af153b45cd96b6cf18bb657: function(input_arrays, output_arrays, option) {\n    var v1 = input_arrays[0];\n    var v2 = input_arrays[1];\n    var v3 = input_arrays[2];\n    var v4 = option['7'];\n    var v5 = option['9'];\n    var D0 = option['11'];\n    var D1 = option['13'];\n    var d0;\n    for (d0 = ((1 > 8) ? (0 % (1 / 8)) : 0); d0 < D0; d0 += ((1 > 8) ? (1 / 8) : 1)) {\n        var v6 = v1[d0];\n        var d1;\n        for (d1 = ((1 > 8) ? (0 / (1 / 8)) : 0); d1 < D1; d1 += ((1 > 8) ? 8 : 1)) {\n            var v7 = v2[d0 + d1*v4];\n            var v8;\n            (function(){\n                v8 = v7 + v6;\n            })();\n            v3[d0 + d1*v5] = v8;\n        }\n    }\n},\n\n};\n",
+  "exec_infos": [
+    {
+      "entry_func_name": "linear",
+      "inputs": [
+        "a149",
+        "a122"
+      ],
+      "outputs": [
+        "a151"
+      ],
+      "call_option": {
+        "m": 1,
+        "n": 128,
+        "k": 1539,
+        "x_k_stride": 1,
+        "x_m_stride": 1539,
+        "w_k_stride": 128,
+        "w_n_stride": 1
+      }
+    },
+    {
+      "entry_func_name": "elementwiseadd_a390ad2e078fc68ac251d2f594dc0f96834a1e57429714605dbf3a02",
+      "inputs": [
+        "a123",
+        "a151",
+        "a152"
+      ],
+      "outputs": [],
+      "call_option": {
+        "7": 128
+      }
+    },
+    {
+      "entry_func_name": "tanh_5e10cc5f1018830bc540c7d2754d138b4faf2e5f6a49784e427a4db4",
+      "inputs": [
+        "a152",
+        "a153"
+      ],
+      "outputs": [],
+      "call_option": {
+        "5": 128
+      }
+    },
+    {
+      "entry_func_name": "linear",
+      "inputs": [
+        "a153",
+        "a124"
+      ],
+      "outputs": [
+        "a154"
+      ],
+      "call_option": {
+        "m": 1,
+        "n": 128,
+        "k": 128,
+        "x_k_stride": 1,
+        "x_m_stride": 128,
+        "w_k_stride": 128,
+        "w_n_stride": 1
+      }
+    },
+    {
+      "entry_func_name": "elementwiseadd_a390ad2e078fc68ac251d2f594dc0f96834a1e57429714605dbf3a02",
+      "inputs": [
+        "a125",
+        "a154",
+        "a155"
+      ],
+      "outputs": [],
+      "call_option": {
+        "7": 128
+      }
+    },
+    {
+      "entry_func_name": "tanh_5e10cc5f1018830bc540c7d2754d138b4faf2e5f6a49784e427a4db4",
+      "inputs": [
+        "a155",
+        "a156"
+      ],
+      "outputs": [],
+      "call_option": {
+        "5": 128
+      }
+    },
+    {
+      "entry_func_name": "linear",
+      "inputs": [
+        "a156",
+        "a126"
+      ],
+      "outputs": [
+        "a157"
+      ],
+      "call_option": {
+        "m": 1,
+        "n": 60,
+        "k": 128,
+        "x_k_stride": 1,
+        "x_m_stride": 128,
+        "w_k_stride": 60,
+        "w_n_stride": 1
+      }
+    },
+    {
+      "entry_func_name": "elementwiseadd_a390ad2e078fc68ac251d2f594dc0f96834a1e57429714605dbf3a02",
+      "inputs": [
+        "a127",
+        "a157",
+        "a158"
+      ],
+      "outputs": [],
+      "call_option": {
+        "7": 60
+      }
+    },
+    {
+      "entry_func_name": "tanh_5e10cc5f1018830bc540c7d2754d138b4faf2e5f6a49784e427a4db4",
+      "inputs": [
+        "a158",
+        "a159"
+      ],
+      "outputs": [],
+      "call_option": {
+        "5": 60
+      }
+    },
+    {
+      "entry_func_name": "linear",
+      "inputs": [
+        "a148",
+        "a128"
+      ],
+      "outputs": [
+        "a160"
+      ],
+      "call_option": {
+        "m": 1,
+        "n": 128,
+        "k": 100,
+        "x_k_stride": 1,
+        "x_m_stride": 100,
+        "w_k_stride": 128,
+        "w_n_stride": 1
+      }
+    },
+    {
+      "entry_func_name": "elementwiseadd_a390ad2e078fc68ac251d2f594dc0f96834a1e57429714605dbf3a02",
+      "inputs": [
+        "a129",
+        "a160",
+        "a161"
+      ],
+      "outputs": [],
+      "call_option": {
+        "7": 128
+      }
+    },
+    {
+      "entry_func_name": "tanh_5e10cc5f1018830bc540c7d2754d138b4faf2e5f6a49784e427a4db4",
+      "inputs": [
+        "a161",
+        "a162"
+      ],
+      "outputs": [],
+      "call_option": {
+        "5": 128
+      }
+    },
+    {
+      "entry_func_name": "linear",
+      "inputs": [
+        "a162",
+        "a130"
+      ],
+      "outputs": [
+        "a163"
+      ],
+      "call_option": {
+        "m": 1,
+        "n": 60,
+        "k": 128,
+        "x_k_stride": 1,
+        "x_m_stride": 128,
+        "w_k_stride": 60,
+        "w_n_stride": 1
+      }
+    },
+    {
+      "entry_func_name": "elementwiseadd_a390ad2e078fc68ac251d2f594dc0f96834a1e57429714605dbf3a02",
+      "inputs": [
+        "a131",
+        "a163",
+        "a164"
+      ],
+      "outputs": [],
+      "call_option": {
+        "7": 60
+      }
+    },
+    {
+      "entry_func_name": "tanh_5e10cc5f1018830bc540c7d2754d138b4faf2e5f6a49784e427a4db4",
+      "inputs": [
+        "a164",
+        "a165"
+      ],
+      "outputs": [],
+      "call_option": {
+        "5": 60
+      }
+    },
+    {
+      "entry_func_name": "concat",
+      "inputs": [
+        "a165",
+        "a159"
+      ],
+      "outputs": [
+        "a166"
+      ],
+      "call_option": {
+        "x_shapes": [
+          [
+            1,
+            60
+          ],
+          [
+            1,
+            60
+          ]
+        ],
+        "x_strides": [
+          [
+            120,
+            1
+          ],
+          [
+            120,
+            1
+          ]
+        ],
+        "x_offsets": [
+          0,
+          60
+        ]
+      }
+    },
+    {
+      "entry_func_name": "linear",
+      "inputs": [
+        "a166",
+        "a132"
+      ],
+      "outputs": [
+        "a167"
+      ],
+      "call_option": {
+        "m": 1,
+        "n": 240,
+        "k": 120,
+        "x_k_stride": 1,
+        "x_m_stride": 120,
+        "w_k_stride": 240,
+        "w_n_stride": 1
+      }
+    },
+    {
+      "entry_func_name": "elementwiseadd_a390ad2e078fc68ac251d2f594dc0f96834a1e57429714605dbf3a02",
+      "inputs": [
+        "a133",
+        "a167",
+        "a168"
+      ],
+      "outputs": [],
+      "call_option": {
+        "7": 240
+      }
+    },
+    {
+      "entry_func_name": "tanh_5e10cc5f1018830bc540c7d2754d138b4faf2e5f6a49784e427a4db4",
+      "inputs": [
+        "a168",
+        "a169"
+      ],
+      "outputs": [],
+      "call_option": {
+        "5": 240
+      }
+    },
+    {
+      "entry_func_name": "linear",
+      "inputs": [
+        "a169",
+        "a134"
+      ],
+      "outputs": [
+        "a170"
+      ],
+      "call_option": {
+        "m": 1,
+        "n": 3840,
+        "k": 240,
+        "x_k_stride": 1,
+        "x_m_stride": 240,
+        "w_k_stride": 3840,
+        "w_n_stride": 1
+      }
+    },
+    {
+      "entry_func_name": "elementwisemul_f461891bf6151c1c8e19d27f04620fa161f4c4198372c1c58d4c1daf",
+      "inputs": [
+        "a135",
+        "a170",
+        "a171"
+      ],
+      "outputs": [],
+      "call_option": {
+        "7": 3840
+      }
+    },
+    {
+      "entry_func_name": "elementwiseadd_a390ad2e078fc68ac251d2f594dc0f96834a1e57429714605dbf3a02",
+      "inputs": [
+        "a136",
+        "a171",
+        "a172"
+      ],
+      "outputs": [],
+      "call_option": {
+        "7": 3840
+      }
+    },
+    {
+      "entry_func_name": "tanh_5e10cc5f1018830bc540c7d2754d138b4faf2e5f6a49784e427a4db4",
+      "inputs": [
+        "a172",
+        "a173"
+      ],
+      "outputs": [],
+      "call_option": {
+        "5": 3840
+      }
+    },
+    {
+      "entry_func_name": "reshape",
+      "inputs": [
+        "a173"
+      ],
+      "outputs": [
+        "a174"
+      ],
+      "call_option": {
+        "length": 3840
+      }
+    },
+    {
+      "entry_func_name": "convolution_2d",
+      "inputs": [
+        "a174",
+        "a137"
+      ],
+      "outputs": [
+        "a175"
+      ],
+      "call_option": {
+        "in_spatial": [
+          40,
+          24
+        ],
+        "n": 1,
+        "out_size": 128,
+        "in_size": 4,
+        "out_spatial": [
+          40,
+          24
+        ],
+        "strides_x": [
+          3840,
+          96,
+          4,
+          1
+        ],
+        "strides_w": [
+          1,
+          1536,
+          512,
+          128
+        ],
+        "strides_y": [
+          122880,
+          3072,
+          128,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "ksize": [
+          3,
+          3
+        ],
+        "dilation_rate": [
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "entry_func_name": "elementwisemul_189c2cd2099b07d9b26be17558d058dad850b3433e7038c72419880f",
+      "inputs": [
+        "a138",
+        "a175",
+        "a176"
+      ],
+      "outputs": [],
+      "call_option": {
+        "7": 128,
+        "9": 128,
+        "11": 128,
+        "13": 960
+      }
+    },
+    {
+      "entry_func_name": "elementwiseadd_653f37079602765521bb5cca1b07d2b80af153b45cd96b6cf18bb657",
+      "inputs": [
+        "a139",
+        "a176",
+        "a177"
+      ],
+      "outputs": [],
+      "call_option": {
+        "7": 128,
+        "9": 128,
+        "11": 128,
+        "13": 960
+      }
+    },
+    {
+      "entry_func_name": "tanh_5e10cc5f1018830bc540c7d2754d138b4faf2e5f6a49784e427a4db4",
+      "inputs": [
+        "a177",
+        "a178"
+      ],
+      "outputs": [],
+      "call_option": {
+        "5": 122880
+      }
+    },
+    {
+      "entry_func_name": "convolution_2d",
+      "inputs": [
+        "a178",
+        "a140"
+      ],
+      "outputs": [
+        "a179"
+      ],
+      "call_option": {
+        "in_spatial": [
+          40,
+          24
+        ],
+        "n": 1,
+        "out_size": 32,
+        "in_size": 128,
+        "out_spatial": [
+          40,
+          24
+        ],
+        "strides_x": [
+          122880,
+          3072,
+          128,
+          1
+        ],
+        "strides_w": [
+          1,
+          12288,
+          4096,
+          32
+        ],
+        "strides_y": [
+          30720,
+          768,
+          32,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "ksize": [
+          3,
+          3
+        ],
+        "dilation_rate": [
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "entry_func_name": "elementwisemul_189c2cd2099b07d9b26be17558d058dad850b3433e7038c72419880f",
+      "inputs": [
+        "a141",
+        "a179",
+        "a180"
+      ],
+      "outputs": [],
+      "call_option": {
+        "7": 32,
+        "9": 32,
+        "11": 32,
+        "13": 960
+      }
+    },
+    {
+      "entry_func_name": "elementwiseadd_653f37079602765521bb5cca1b07d2b80af153b45cd96b6cf18bb657",
+      "inputs": [
+        "a142",
+        "a180",
+        "a181"
+      ],
+      "outputs": [],
+      "call_option": {
+        "7": 32,
+        "9": 32,
+        "11": 32,
+        "13": 960
+      }
+    },
+    {
+      "entry_func_name": "tanh_5e10cc5f1018830bc540c7d2754d138b4faf2e5f6a49784e427a4db4",
+      "inputs": [
+        "a181",
+        "a182"
+      ],
+      "outputs": [],
+      "call_option": {
+        "5": 30720
+      }
+    },
+    {
+      "entry_func_name": "convolution_2d",
+      "inputs": [
+        "a182",
+        "a143"
+      ],
+      "outputs": [
+        "a183"
+      ],
+      "call_option": {
+        "in_spatial": [
+          40,
+          24
+        ],
+        "n": 1,
+        "out_size": 16,
+        "in_size": 32,
+        "out_spatial": [
+          40,
+          24
+        ],
+        "strides_x": [
+          30720,
+          768,
+          32,
+          1
+        ],
+        "strides_w": [
+          1,
+          1536,
+          512,
+          16
+        ],
+        "strides_y": [
+          15360,
+          384,
+          16,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "ksize": [
+          3,
+          3
+        ],
+        "dilation_rate": [
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "entry_func_name": "elementwisemul_189c2cd2099b07d9b26be17558d058dad850b3433e7038c72419880f",
+      "inputs": [
+        "a144",
+        "a183",
+        "a184"
+      ],
+      "outputs": [],
+      "call_option": {
+        "7": 16,
+        "9": 16,
+        "11": 16,
+        "13": 960
+      }
+    },
+    {
+      "entry_func_name": "elementwiseadd_653f37079602765521bb5cca1b07d2b80af153b45cd96b6cf18bb657",
+      "inputs": [
+        "a145",
+        "a184",
+        "a185"
+      ],
+      "outputs": [],
+      "call_option": {
+        "7": 16,
+        "9": 16,
+        "11": 16,
+        "13": 960
+      }
+    },
+    {
+      "entry_func_name": "tanh_5e10cc5f1018830bc540c7d2754d138b4faf2e5f6a49784e427a4db4",
+      "inputs": [
+        "a185",
+        "a186"
+      ],
+      "outputs": [],
+      "call_option": {
+        "5": 15360
+      }
+    },
+    {
+      "entry_func_name": "convolution_2d",
+      "inputs": [
+        "a186",
+        "a146"
+      ],
+      "outputs": [
+        "a187"
+      ],
+      "call_option": {
+        "in_spatial": [
+          40,
+          24
+        ],
+        "n": 1,
+        "out_size": 3,
+        "in_size": 16,
+        "out_spatial": [
+          40,
+          24
+        ],
+        "strides_x": [
+          15360,
+          384,
+          16,
+          1
+        ],
+        "strides_w": [
+          1,
+          144,
+          48,
+          3
+        ],
+        "strides_y": [
+          2880,
+          72,
+          3,
+          1
+        ],
+        "padding": [
+          1,
+          1
+        ],
+        "stride": [
+          1,
+          1
+        ],
+        "ksize": [
+          3,
+          3
+        ],
+        "dilation_rate": [
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "entry_func_name": "elementwiseadd_653f37079602765521bb5cca1b07d2b80af153b45cd96b6cf18bb657",
+      "inputs": [
+        "a147",
+        "a187",
+        "a188"
+      ],
+      "outputs": [],
+      "call_option": {
+        "7": 3,
+        "9": 3,
+        "11": 3,
+        "13": 960
+      }
+    },
+    {
+      "entry_func_name": "tanh_5e10cc5f1018830bc540c7d2754d138b4faf2e5f6a49784e427a4db4",
+      "inputs": [
+        "a188",
+        "a150"
+      ],
+      "outputs": [],
+      "call_option": {
+        "5": 2880
+      }
+    }
+  ],
+  "weight_encoding": "raw",
+  "memory_layout": {
+    "static": {
+      "size": 1494626,
+      "allocations": {
+        "a148": {
+          "name": "a148",
+          "offset": 1494526,
+          "size": 100
+        },
+        "a149": {
+          "name": "a149",
+          "offset": 1492987,
+          "size": 1539
+        },
+        "a151": {
+          "name": "a151",
+          "offset": 1353323,
+          "size": 128
+        },
+        "a152": {
+          "name": "a152",
+          "offset": 1353195,
+          "size": 128
+        },
+        "a153": {
+          "name": "a153",
+          "offset": 1353067,
+          "size": 128
+        },
+        "a154": {
+          "name": "a154",
+          "offset": 1353195,
+          "size": 128
+        },
+        "a155": {
+          "name": "a155",
+          "offset": 1353067,
+          "size": 128
+        },
+        "a156": {
+          "name": "a156",
+          "offset": 1353195,
+          "size": 128
+        },
+        "a157": {
+          "name": "a157",
+          "offset": 1353451,
+          "size": 60
+        },
+        "a158": {
+          "name": "a158",
+          "offset": 1353511,
+          "size": 60
+        },
+        "a159": {
+          "name": "a159",
+          "offset": 1353451,
+          "size": 60
+        },
+        "a160": {
+          "name": "a160",
+          "offset": 1353067,
+          "size": 128
+        },
+        "a161": {
+          "name": "a161",
+          "offset": 1353323,
+          "size": 128
+        },
+        "a162": {
+          "name": "a162",
+          "offset": 1353067,
+          "size": 128
+        },
+        "a163": {
+          "name": "a163",
+          "offset": 1353511,
+          "size": 60
+        },
+        "a164": {
+          "name": "a164",
+          "offset": 1353571,
+          "size": 60
+        },
+        "a165": {
+          "name": "a165",
+          "offset": 1353511,
+          "size": 60
+        },
+        "a166": {
+          "name": "a166",
+          "offset": 1353323,
+          "size": 120
+        },
+        "a167": {
+          "name": "a167",
+          "offset": 1352827,
+          "size": 240
+        },
+        "a168": {
+          "name": "a168",
+          "offset": 1353067,
+          "size": 240
+        },
+        "a169": {
+          "name": "a169",
+          "offset": 1352827,
+          "size": 240
+        },
+        "a170": {
+          "name": "a170",
+          "offset": 1347067,
+          "size": 3840
+        },
+        "a171": {
+          "name": "a171",
+          "offset": 1343227,
+          "size": 3840
+        },
+        "a172": {
+          "name": "a172",
+          "offset": 1339387,
+          "size": 3840
+        },
+        "a173": {
+          "name": "a173",
+          "offset": 1343227,
+          "size": 3840
+        },
+        "a174": {
+          "name": "a174",
+          "offset": 1347067,
+          "size": 3840
+        },
+        "a175": {
+          "name": "a175",
+          "offset": 1370107,
+          "size": 122880
+        },
+        "a176": {
+          "name": "a176",
+          "offset": 1247227,
+          "size": 122880
+        },
+        "a177": {
+          "name": "a177",
+          "offset": 1370107,
+          "size": 122880
+        },
+        "a178": {
+          "name": "a178",
+          "offset": 1247227,
+          "size": 122880
+        },
+        "a179": {
+          "name": "a179",
+          "offset": 1370107,
+          "size": 30720
+        },
+        "a180": {
+          "name": "a180",
+          "offset": 1277947,
+          "size": 30720
+        },
+        "a181": {
+          "name": "a181",
+          "offset": 1247227,
+          "size": 30720
+        },
+        "a182": {
+          "name": "a182",
+          "offset": 1277947,
+          "size": 30720
+        },
+        "a183": {
+          "name": "a183",
+          "offset": 1308667,
+          "size": 15360
+        },
+        "a184": {
+          "name": "a184",
+          "offset": 1324027,
+          "size": 15360
+        },
+        "a185": {
+          "name": "a185",
+          "offset": 1339387,
+          "size": 15360
+        },
+        "a186": {
+          "name": "a186",
+          "offset": 1277947,
+          "size": 15360
+        },
+        "a187": {
+          "name": "a187",
+          "offset": 1347067,
+          "size": 2880
+        },
+        "a188": {
+          "name": "a188",
+          "offset": 1349947,
+          "size": 2880
+        },
+        "a150": {
+          "name": "a150",
+          "offset": 1352827,
+          "size": 2880
+        },
+        "a122": {
+          "name": "a122",
+          "offset": 0,
+          "size": 196992
+        },
+        "a123": {
+          "name": "a123",
+          "offset": 196992,
+          "size": 128
+        },
+        "a124": {
+          "name": "a124",
+          "offset": 197120,
+          "size": 16384
+        },
+        "a125": {
+          "name": "a125",
+          "offset": 213504,
+          "size": 128
+        },
+        "a126": {
+          "name": "a126",
+          "offset": 213632,
+          "size": 7680
+        },
+        "a127": {
+          "name": "a127",
+          "offset": 221312,
+          "size": 60
+        },
+        "a128": {
+          "name": "a128",
+          "offset": 221372,
+          "size": 12800
+        },
+        "a129": {
+          "name": "a129",
+          "offset": 234172,
+          "size": 128
+        },
+        "a130": {
+          "name": "a130",
+          "offset": 234300,
+          "size": 7680
+        },
+        "a131": {
+          "name": "a131",
+          "offset": 241980,
+          "size": 60
+        },
+        "a132": {
+          "name": "a132",
+          "offset": 242040,
+          "size": 28800
+        },
+        "a133": {
+          "name": "a133",
+          "offset": 270840,
+          "size": 240
+        },
+        "a134": {
+          "name": "a134",
+          "offset": 271080,
+          "size": 921600
+        },
+        "a135": {
+          "name": "a135",
+          "offset": 1192680,
+          "size": 3840
+        },
+        "a136": {
+          "name": "a136",
+          "offset": 1196520,
+          "size": 3840
+        },
+        "a137": {
+          "name": "a137",
+          "offset": 1200360,
+          "size": 4608
+        },
+        "a138": {
+          "name": "a138",
+          "offset": 1204968,
+          "size": 128
+        },
+        "a139": {
+          "name": "a139",
+          "offset": 1205096,
+          "size": 128
+        },
+        "a140": {
+          "name": "a140",
+          "offset": 1205224,
+          "size": 36864
+        },
+        "a141": {
+          "name": "a141",
+          "offset": 1242088,
+          "size": 32
+        },
+        "a142": {
+          "name": "a142",
+          "offset": 1242120,
+          "size": 32
+        },
+        "a143": {
+          "name": "a143",
+          "offset": 1242152,
+          "size": 4608
+        },
+        "a144": {
+          "name": "a144",
+          "offset": 1246760,
+          "size": 16
+        },
+        "a145": {
+          "name": "a145",
+          "offset": 1246776,
+          "size": 16
+        },
+        "a146": {
+          "name": "a146",
+          "offset": 1246792,
+          "size": 432
+        },
+        "a147": {
+          "name": "a147",
+          "offset": 1247224,
+          "size": 3
+        }
+      }
+    },
+    "dynamic": {
+      "size": 0,
+      "allocations": {}
+    }
+  },
+  "placeholders": {},
+  "inputs": [
+    "a148",
+    "a149"
+  ],
+  "outputs": [
+    "a150"
+  ],
+  "licenses": {
+    "webdnn": "(C) Machine Intelligence Laboratory (The University of Tokyo), MIT License"
+  }
+}

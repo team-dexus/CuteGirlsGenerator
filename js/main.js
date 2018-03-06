@@ -13,9 +13,25 @@ window.onload = () => {
 	cont = canv.getContext('2d');
 	w = d.getElementById('w');
 	h = d.getElementById('h');
-	canv.width = 168;
-	canv.height = 280;
+	canv.width = 128;
+	canv.height = 128;
 	textRoll('-Generate ultimate cute girls-', d.getElementById('display'), 50, d.getElementById('shel'), '<h1 class="logo">-Generate <span class="text">ultimate cute</span> girls.-</h1>');
+	tag=str=>str.split(/[\　\ ]+/ig);
+
+	//モデルの読み込み
+	d.getElementById("generate").setAttribute("disabled", true)
+	d.getElementById("download").setAttribute("disabled", true)
+	d.getElementById("genOrLoad").textContent = "loading..."
+	WebDNN.load('./output')
+   .then(function(loaded){
+       console.log('loaded');
+			 runner = loaded
+			 console.log(runner.backendName);
+			 d.getElementById("generate").removeAttribute("disabled")
+			 d.getElementById("download").removeAttribute("disabled")
+			 d.getElementById("genOrLoad").textContent = "Generate!"
+       // add your code here.
+   });
 }
 
 function textRoll(text, target, interval, subtarget, afterInput) {

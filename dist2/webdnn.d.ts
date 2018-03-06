@@ -138,6 +138,10 @@ declare module 'webdnn/graph_descriptor/graph_descriptor' {
 	 */
 	export interface GraphDescriptor {
 	    /**
+	     * Unix timestamp when this graph descriptor is generated
+	     */
+	    converted_at: number;
+	    /**
 	     * input variables' name
 	     */
 	    inputs: string[];
@@ -167,62 +171,143 @@ declare module 'webdnn/symbolic_typed_array/symbolic_typed_array' {
 	 * @module webdnn
 	 */
 	/** Don't Remove This comment block */
-	import { Allocation } from 'webdnn/graph_descriptor/memory_layout';
-	import PlaceholderContext from 'webdnn/placeholder';
+	import PlaceholderContext, { Placeholder } from 'webdnn/placeholder';
 	/**
-	 * SymbolicTypedArray is wrapper class of buffers used in DNN model.
+	 * @protected
 	 */
 	export abstract class SymbolicTypedArray<T extends Float32Array | Int32Array> {
-	    protected ignoreOffsetOnActual: boolean;
-	    protected arrayBuffer?: ArrayBuffer;
-	    protected allocation: Allocation;
-	    protected placeholderContext?: PlaceholderContext;
+	    protected placeholderContext: PlaceholderContext | null;
 	    /**
-	     * Convert symbolic buffer view into actual buffer view.
+	     * @protected
+	     */
+	    readonly _length: number | Placeholder;
+	    /**
+	     * @protected
+	     */
+	    readonly _byteOffset: number | Placeholder;
+	    /**
+	     * The size in bytes of each element in the array.
+	     */
+	    readonly abstract BYTES_PER_ELEMENT: number;
+	    /**
+	     * @protected
+	     */
+	    protected _buffer: ArrayBufferLike | null;
+	    /**
+	     * @protected
+	     */
+	    name: string;
+	    /**
+	     * @protected
+	     */
+	    constructor(buffer?: ArrayBufferLike | null, byteOffset?: number | Placeholder, length?: number | Placeholder, placeholderContext?: PlaceholderContext | null);
+	    /**
+	     * Convert SymbolicTypedArray instance into actual TypedArray instance.
 	     *
 	     * @returns actual typed array
 	     */
 	    abstract toActual(): T;
 	    /**
-	     * toActual:
-	     *
-	     * If this buffer view is initialized based on placeholder offset or size and the placeholder is not resolved,
-	     * the error is thrown.
+	     * The ArrayBuffer instance referenced by the array.
 	     */
 	    /**
-	     * @param {Allocation} allocation
-	     * @param {PlaceholderContext} placeholderContext
-	     * @param {boolean} ignoreOffsetOnActual
-	     * @protected
+	     * The ArrayBuffer instance referenced by the array.
 	     */
-	    constructor(allocation: Allocation, placeholderContext?: PlaceholderContext, ignoreOffsetOnActual?: boolean);
+	    buffer: ArrayBufferLike;
 	    /**
-	     * @protected
+	     * The length in bytes of the array.
 	     */
-	    setArrayBuffer(arrayBuffer: any): void;
+	    readonly byteLength: number;
 	    /**
-	     * @protected
+	     * The number in this buffer. Actual offset size is `(offset * SIZE_OF_FLOAT)`.
 	     */
-	    readonly name: string;
+	    readonly offset: number;
 	    /**
 	     * @protected
 	     */
 	    readonly isDynamic: boolean;
 	    /**
-	     * @protected
-	     */
-	    readonly offset: any;
-	    /**
 	     * The number of elements in this buffer. Actual byte size is `(length * SIZE_OF_FLOAT)`.
 	     */
 	    readonly length: number;
 	    /**
-	     * Sets a value or an array of values.
-	     *
-	     * @param array A typed or untyped array of values to set.
-	     * @param offset The index at which the values will be written.
+	     * The offset in bytes of the array.
 	     */
-	    set(array: ArrayLike<number>, offset?: number): void;
+	    readonly byteOffset: any;
+	    /**
+	     * Returns the this object after copying a section of the array identified by start and end
+	     * to the same array starting at position target
+	     * @param target If target is negative, it is treated as length+target where length is the
+	     * length of the array.
+	     * @param start If start is negative, it is treated as length+start. If end is negative, it
+	     * is treated as length+end.
+	     * @param end If not specified, length of the this object is used as its default value.
+	     */
+	    copyWithin(target: number, start: number, end?: number): this;
+	    /**
+	     * Returns the this object after filling the section identified by start and end with value
+	     * @param value value to fill array section with
+	     * @param start index to start filling the array at. If start is negative, it is treated as
+	     * length+start where length is the length of the array.
+	     * @param end index to stop filling the array at. If end is negative, it is treated as
+	     * length+end.
+	     */
+	    fill(value: number, start?: number, end?: number): this;
+	    /**
+	     * Returns the index of the first occurrence of a value in an array.
+	     * @param searchElement The value to locate in the array.
+	     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+	     *  search starts at index 0.
+	     */
+	    indexOf(searchElement: number, fromIndex?: number): number;
+	    /**
+	     * Adds all the elements of an array separated by the specified separator string.
+	     * @param separator A string used to separate one element of an array from the next in the
+	     * resulting String. If omitted, the array elements are separated with a comma.
+	     */
+	    join(separator?: string): string;
+	    /**
+	     * Returns the index of the last occurrence of a value in an array.
+	     * @param searchElement The value to locate in the array.
+	     * @param fromIndex The array index at which to begin the search. If fromIndex is omitted, the
+	     * search starts at index 0.
+	     */
+	    lastIndexOf(searchElement: number, fromIndex?: number): number;
+	    /**
+	     * Sorts an array.
+	     * @param compareFn The name of the function used to determine the order of the elements. If
+	     * omitted, the elements are sorted in ascending, ASCII character order.
+	     */
+	    sort(compareFn?: (a: number, b: number) => number): this;
+	    includes(searchElement: number, fromIndex?: number | undefined): boolean;
+	    /**
+	     * Sets a value or an array of values.
+	     * @param array A typed or untyped array of values to set.
+	     * @param offset The index in the current array at which the values are to be written.
+	     */
+	    set(array: ArrayLike<number>, offset?: number | undefined): void;
+	    /**
+	     * Converts a number to a string by using the current locale.
+	     */
+	    toLocaleString(): string;
+	    /**
+	     * Returns a string representation of an array.
+	     */
+	    toString(): string;
+	    /** @protected */
+	    [Symbol.iterator](): IterableIterator<number>;
+	    /**
+	     * Returns an iterable of key, value pairs for every entry in the array
+	     */
+	    entries(): IterableIterator<[number, number]>;
+	    /**
+	     * Returns an iterable of keys in the array
+	     */
+	    keys(): IterableIterator<number>;
+	    /**
+	     * Returns an iterable of values in the array
+	     */
+	    values(): IterableIterator<number>;
 	}
 
 }
@@ -233,10 +318,171 @@ declare module 'webdnn/symbolic_typed_array/symbolic_float32array' {
 	/** Don't Remove This comment block */
 	import { SymbolicTypedArray } from 'webdnn/symbolic_typed_array/symbolic_typed_array';
 	/**
-	 * @protected
+	 * Typed array used for input and output variables of [[webdnn.DescriptorRunner| `DescriptorRunner`]].
+	 * You can use `SymbolicFloat32Array` almost as same as `Float32Array`.
+	 *
+	 * To convert `SymbolicFloat32Array` into actual `Float32Array`, use [[webdnn.SymbolicFloat32Array.toActual| `toActual()`]]
+	 *
+	 * ```js
+	 *
+	 * let result = runner.outputs[0];  //runner.outputs is array of SymbolicFloat32Array
+	 *
+	 * // SymbolicFloat32Array does NOT support index access
+	 * console.log(result[0]);
+	 * >>> undefined
+	 *
+	 * // By conversion, you can access each element by index
+	 * console.log(result.toActual()[0]);
+	 * >>> 1.00  // Actual result
+	 * ```
 	 */
-	export default class SymbolicFloat32Array extends SymbolicTypedArray<Float32Array> {
+	export default class SymbolicFloat32Array extends SymbolicTypedArray<Float32Array> implements Float32Array {
+	    /** @protected */
+	    [Symbol.toStringTag]: "Float32Array";
+	    /** @protected */
+	    [index: number]: number;
+	    /**
+	     * The size in bytes of each element in SymbolicFloat32Array.
+	     */
+	    static readonly BYTES_PER_ELEMENT: number;
+	    /**
+	     * The size in bytes of each element in the array.
+	     */
+	    readonly BYTES_PER_ELEMENT: number;
+	    /**
+	     * Convert SymbolicTypedArray instance into actual TypedArray instance.
+	     *
+	     * @returns actual typed array
+	     */
 	    toActual(): Float32Array;
+	    /**
+	     * Determines whether all the members of an array satisfy the specified test.
+	     * @param callbackfn A function that accepts up to three arguments. The every method calls
+	     * the callbackfn function for each element in array1 until the callbackfn returns false,
+	     * or until the end of the array.
+	     * @param thisArg An object to which the this keyword can refer in the callbackfn function.
+	     * If thisArg is omitted, undefined is used as the this value.
+	     */
+	    every(callbackfn: (value: number, index: number, array: Float32Array) => boolean, thisArg?: any): boolean;
+	    /**
+	     * Returns the elements of an array that meet the condition specified in a callback function.
+	     * @param callbackfn A function that accepts up to three arguments. The filter method calls
+	     * the callbackfn function one time for each element in the array.
+	     * @param thisArg An object to which the this keyword can refer in the callbackfn function.
+	     * If thisArg is omitted, undefined is used as the this value.
+	     */
+	    filter(callbackfn: (value: number, index: number, array: Float32Array) => any, thisArg?: any): Float32Array;
+	    /**
+	     * Returns the value of the first element in the array where predicate is true, and undefined
+	     * otherwise.
+	     * @param predicate find calls predicate once for each element of the array, in ascending
+	     * order, until it finds one where predicate returns true. If such an element is found, find
+	     * immediately returns that element value. Otherwise, find returns undefined.
+	     * @param thisArg If provided, it will be used as the this value for each invocation of
+	     * predicate. If it is not provided, undefined is used instead.
+	     */
+	    find(predicate: (value: number, index: number, obj: Float32Array) => boolean, thisArg?: any): number | undefined;
+	    /**
+	     * Returns the index of the first element in the array where predicate is true, and -1
+	     * otherwise.
+	     * @param predicate find calls predicate once for each element of the array, in ascending
+	     * order, until it finds one where predicate returns true. If such an element is found,
+	     * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
+	     * @param thisArg If provided, it will be used as the this value for each invocation of
+	     * predicate. If it is not provided, undefined is used instead.
+	     */
+	    findIndex(predicate: (value: number, index: number, obj: Float32Array) => boolean, thisArg?: any): number;
+	    /**
+	     * Performs the specified action for each element in an array.
+	     * @param callbackfn  A function that accepts up to three arguments. forEach calls the
+	     * callbackfn function one time for each element in the array.
+	     * @param thisArg  An object to which the this keyword can refer in the callbackfn function.
+	     * If thisArg is omitted, undefined is used as the this value.
+	     */
+	    forEach(callbackfn: (value: number, index: number, array: Float32Array) => void, thisArg?: any): void;
+	    /**
+	     * Calls a defined callback function on each element of an array, and returns an array that
+	     * contains the results.
+	     * @param callbackfn A function that accepts up to three arguments. The map method calls the
+	     * callbackfn function one time for each element in the array.
+	     * @param thisArg An object to which the this keyword can refer in the callbackfn function.
+	     * If thisArg is omitted, undefined is used as the this value.
+	     */
+	    map(callbackfn: (value: number, index: number, array: Float32Array) => number, thisArg?: any): Float32Array;
+	    /**
+	     * Calls the specified callback function for all the elements in an array. The return value of
+	     * the callback function is the accumulated result, and is provided as an argument in the next
+	     * call to the callback function.
+	     * @param callbackfn A function that accepts up to four arguments. The reduce method calls the
+	     * callbackfn function one time for each element in the array.
+	     * @param initialValue If initialValue is specified, it is used as the initial value to start
+	     * the accumulation. The first call to the callbackfn function provides this value as an argument
+	     * instead of an array value.
+	     */
+	    reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: Float32Array) => number): number;
+	    reduce(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: Float32Array) => number, initialValue: number): number;
+	    /**
+	     * Calls the specified callback function for all the elements in an array. The return value of
+	     * the callback function is the accumulated result, and is provided as an argument in the next
+	     * call to the callback function.
+	     * @param callbackfn A function that accepts up to four arguments. The reduce method calls the
+	     * callbackfn function one time for each element in the array.
+	     * @param initialValue If initialValue is specified, it is used as the initial value to start
+	     * the accumulation. The first call to the callbackfn function provides this value as an argument
+	     * instead of an array value.
+	     */
+	    reduce<U>(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Float32Array) => U, initialValue: U): U;
+	    /**
+	     * Calls the specified callback function for all the elements in an array, in descending order.
+	     * The return value of the callback function is the accumulated result, and is provided as an
+	     * argument in the next call to the callback function.
+	     * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls
+	     * the callbackfn function one time for each element in the array.
+	     * @param initialValue If initialValue is specified, it is used as the initial value to start
+	     * the accumulation. The first call to the callbackfn function provides this value as an
+	     * argument instead of an array value.
+	     */
+	    reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: Float32Array) => number): number;
+	    reduceRight(callbackfn: (previousValue: number, currentValue: number, currentIndex: number, array: Float32Array) => number, initialValue: number): number;
+	    /**
+	     * Calls the specified callback function for all the elements in an array, in descending order.
+	     * The return value of the callback function is the accumulated result, and is provided as an
+	     * argument in the next call to the callback function.
+	     * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls
+	     * the callbackfn function one time for each element in the array.
+	     * @param initialValue If initialValue is specified, it is used as the initial value to start
+	     * the accumulation. The first call to the callbackfn function provides this value as an argument
+	     * instead of an array value.
+	     */
+	    reduceRight<U>(callbackfn: (previousValue: U, currentValue: number, currentIndex: number, array: Float32Array) => U, initialValue: U): U;
+	    /**
+	     * Reverses the elements in an Array.
+	     */
+	    reverse(): Float32Array;
+	    /**
+	     * Returns a section of an array.
+	     * @param start The beginning of the specified portion of the array.
+	     * @param end The end of the specified portion of the array.
+	     */
+	    slice(start?: number, end?: number): Float32Array;
+	    /**
+	     * Determines whether the specified callback function returns true for any element of an array.
+	     * @param callbackfn A function that accepts up to three arguments. The some method calls the
+	     * callbackfn function for each element in array1 until the callbackfn returns true, or until
+	     * the end of the array.
+	     * @param thisArg An object to which the this keyword can refer in the callbackfn function.
+	     * If thisArg is omitted, undefined is used as the this value.
+	     */
+	    some(callbackfn: (value: number, index: number, array: Float32Array) => boolean, thisArg?: any): boolean;
+	    /**
+	     * Gets a new Float32Array view of the ArrayBuffer store for this array, referencing the elements
+	     * at begin, inclusive, up to end, exclusive.
+	     * @param begin The index of the beginning of the array.
+	     * @param end The index of the end of the array.
+	     */
+	    subarray(begin: number, end?: number): Float32Array;
+	    /** @protected */
+	    includes(searchElement: number, fromIndex?: number | undefined): boolean;
 	}
 
 }
@@ -252,16 +498,16 @@ declare module 'webdnn/descriptor_runner/descriptor_runner' {
 	/**
 	 * @protected
 	 */
-	export interface DescriptorRunnerConstructor<D extends GraphDescriptor> {
-	    new (option?: any): DescriptorRunner<D>;
+	export interface DescriptorRunnerConstructor<D extends GraphDescriptor, P> {
+	    new (option?: any): DescriptorRunner<D, P>;
 	    checkAvailability(): boolean;
 	}
 	/**
 	 * `DescriptorRunner` provides interface to execute DNN model and access input and output buffers.
 	 */
-	export abstract class DescriptorRunner<D extends GraphDescriptor> {
+	export abstract class DescriptorRunner<D extends GraphDescriptor, P> {
 	    /**
-	     * For Developper:
+	     * For Developer:
 	     *
 	     * `DescriptorRunner` executes computation based on `GraphDescriptor`.
 	     *
@@ -290,24 +536,59 @@ declare module 'webdnn/descriptor_runner/descriptor_runner' {
 	     * to call `GraphDescriptor#load()` directly. In that method, all procedures in step 1 and 2 are performed.
 	     */
 	    /**
-	     * The name of active backend
+	     * The backend name
 	     */
 	    readonly backendName: BackendName;
-	    protected _running: boolean;
+	    /**
+	     * The descriptor
+	     */
 	    protected descriptor: D | null;
+	    /**
+	     * placeholder context which manages all placeholders and their values
+	     */
 	    protected placeholderContext: PlaceholderContext | null;
 	    /**
-	     * @protected
+	     * input arrays
 	     */
-	    ignoreCache: boolean;
+	    inputs: SymbolicFloat32Array[];
 	    /**
-	     * Initialize this runner
-	     *
+	     * outputs arrays
+	     */
+	    outputs: SymbolicFloat32Array[];
+	    /**
+	     * Return `true` if this backend is available in this environment.
+	     * @returns {boolean}
+	     */
+	    static checkAvailability(): boolean;
+	    /**
+	     * Initialize descriptor runner asynchronously
+	     * @returns {Promise<void>} Promise object which is resolved when the initialization finished.
 	     * @protected
 	     */
 	    abstract init(): Promise<void>;
 	    /**
-	     * Fetch descriptor from specified directory.
+	     * set graph descriptor and parameters
+	     * @protected
+	     */
+	    abstract setDescriptorAndParameters(descriptor: D, parameters: P): Promise<void>;
+	    /**
+	     * Fetch graph descriptor from specified directory.
+	     *
+	     * @param directory directory where descriptor is contained.
+	     * You can also provide URL of other domain like this.
+	     *
+	     * ```javascript
+	     * await runner.load('://my.other.domain.com/my_model');
+	     * ```
+	     *
+	     * However sometimes it can't because of Cross-Origin-Resource-Security policy.
+	     *
+	     * @protected
+	     */
+	    abstract fetchDescriptor(directory: string): Promise<D>;
+	    /**
+	     * Fetch parameter files from specified directory.
+	     *
 	     * @param directory directory where descriptor is contained.
 	     * You can also provide URL of other domain like this.
 	     *
@@ -320,7 +601,22 @@ declare module 'webdnn/descriptor_runner/descriptor_runner' {
 	     * @param progressCallback callback which is called to notice the loading is progressing.
 	     * @protected
 	     */
-	    abstract load(directory: string, progressCallback?: (loaded: number, total: number) => any): Promise<void>;
+	    abstract fetchParameters(directory: string, progressCallback?: (loaded: number, total: number) => any): Promise<P>;
+	    /**
+	     * Load cached descriptor from WebStorage
+	     * @protected
+	     */
+	    abstract restoreCachedDescriptor(directory: string): Promise<D | null>;
+	    /**
+	     * Load cached descriptor from WebStorage
+	     * @protected
+	     */
+	    abstract restoreCachedParameters(directory: string, progressCallback?: (loaded: number, total: number) => any): Promise<P | null>;
+	    /**
+	     * save cache
+	     * @protected
+	     */
+	    abstract saveCache(directory: string, descriptor: D, parameters: P): Promise<void>;
 	    /**
 	     * Set actual value into placeholders. If no placeholder is exist in graph descriptor, it's no need to call this function.
 	     *
@@ -333,13 +629,17 @@ declare module 'webdnn/descriptor_runner/descriptor_runner' {
 	    /**
 	     * Get input [[webdnn.SymbolicFloat32Array|`SymbolicFloat32Array`]] object
 	     *
+	     * @protected
 	     * @returns array of input [[webdnn.SymbolicFloat32Array|`SymbolicFloat32Array`]]
+	     * @deprecated use [[webdnn.DescriptorRunner.inputs| `inputs`]] instead.
 	     */
 	    abstract getInputViews(): SymbolicFloat32Array[];
 	    /**
 	     * Get output [[webdnn.SymbolicFloat32Array|`SymbolicFloat32Array`]] object
 	     *
+	     * @protected
 	     * @returns array of output [[webdnn.SymbolicFloat32Array|`SymbolicFloat32Array`]]
+	     * @deprecated use [[webdnn.DescriptorRunner.outputs| `outputs`]] instead.
 	     */
 	    abstract getOutputViews(): SymbolicFloat32Array[];
 	    /**
@@ -347,11 +647,6 @@ declare module 'webdnn/descriptor_runner/descriptor_runner' {
 	     * [[webdnn.DescriptorRunner.getOutputViews|`getOutputViews`]] before calling this function.
 	     */
 	    abstract run(): Promise<void>;
-	    /**
-	     * Return `true` if model is running.
-	     * While running, calling run() again or modifying input is invalid.
-	     */
-	    readonly running: boolean;
 	}
 
 }
@@ -370,10 +665,6 @@ declare module 'webdnn/decoder/weight_decoder' {
 
 }
 declare module 'webdnn/decoder/weight_decoder_eightbit' {
-	/**
-	 * @module webdnn
-	 */
-	/** Don't Remove This comment block */
 	import WeightDecoder from 'webdnn/decoder/weight_decoder';
 	/**
 	 * @protected
@@ -407,7 +698,7 @@ declare module 'webdnn/decoder/get_weight_decoder' {
 	/**
 	 * @protected
 	 */
-	export default function get_weight_decoder(name: string): WeightDecoder;
+	export default function getWeightDecoder(name: string): WeightDecoder;
 
 }
 declare module 'webdnn/util/dispatch_scheduler' {
@@ -509,17 +800,32 @@ declare module 'webdnn/descriptor_runner/descriptor_runner_fallback' {
 	/**
 	 * @protected
 	 */
-	export default class DescriptorRunnerFallback extends DescriptorRunner<GraphDescriptorFallback> {
+	export default class DescriptorRunnerFallback extends DescriptorRunner<GraphDescriptorFallback, ArrayBuffer> {
 	    readonly backendName: BackendName;
 	    private kernelObj;
 	    private variableMap;
-	    private inputViews;
-	    private outputViews;
 	    private staticBuffer;
 	    private dynamicBuffer;
+	    private directory;
 	    static checkAvailability(): boolean;
 	    init(): Promise<void>;
-	    load(directory: string, progressCallback?: (loaded: number, total: number) => any): Promise<void>;
+	    setDescriptorAndParameters(descriptor: GraphDescriptorFallback, parameters: ArrayBuffer): Promise<void>;
+	    fetchDescriptor(directory: string): Promise<any>;
+	    fetchParameters(directory: string, progressCallback?: (loaded: number, total: number) => any): Promise<ArrayBuffer>;
+	    /**
+	     * Load cached descriptor from WebStorage
+	     * @protected
+	     */
+	    restoreCachedDescriptor(directory: string): Promise<GraphDescriptorFallback | null>;
+	    /**
+	     * Load cached descriptor from WebStorage
+	     * @protected
+	     */
+	    restoreCachedParameters(directory: string, progressCallback?: (loaded: number, total: number) => any): Promise<ArrayBuffer | null>;
+	    /**
+	     * save cache
+	     */
+	    saveCache(directory: string, descriptor: GraphDescriptorFallback, parameters: ArrayBuffer): Promise<void>;
 	    private setDescriptor(descriptor);
 	    private compile();
 	    private initializeStaticBuffer(weightRawArray);
@@ -559,18 +865,62 @@ declare module 'webdnn/descriptor_runner/descriptor_runner_webassembly' {
 	/**
 	 * @protected
 	 */
-	export default class DescriptorRunnerWebassembly extends DescriptorRunner<GraphDescriptorWebassembly> {
+	export default class DescriptorRunnerWebassembly extends DescriptorRunner<GraphDescriptorWebassembly, ArrayBuffer> {
 	    readonly backendName: BackendName;
-	    private inputViews;
-	    private outputViews;
 	    private worker;
 	    private worker_entry_js_path;
 	    private worker_promise_reject_func;
 	    private worker_initial_error;
+	    private directory;
 	    static checkAvailability(): boolean;
 	    constructor();
 	    init(): Promise<void>;
-	    load(directory: string, progressCallback?: (loaded: number, total: number) => any): Promise<void>;
+	    setDescriptorAndParameters(descriptor: GraphDescriptorWebassembly, parameters: ArrayBuffer): Promise<void>;
+	    /**
+	     * Fetch graph descriptor from specified directory.
+	     *
+	     * @param directory directory where descriptor is contained.
+	     * You can also provide URL of other domain like this.
+	     *
+	     * ```javascript
+	     * await runner.load('://my.other.domain.com/my_model');
+	     * ```
+	     *
+	     * However sometimes it can't because of Cross-Origin-Resource-Security policy.
+	     *
+	     * @protected
+	     */
+	    fetchDescriptor(directory: string): Promise<GraphDescriptorWebassembly>;
+	    /**
+	     * Fetch parameter files from specified directory.
+	     *
+	     * @param directory directory where descriptor is contained.
+	     * You can also provide URL of other domain like this.
+	     *
+	     * ```javascript
+	     * await runner.load('://my.other.domain.com/my_model');
+	     * ```
+	     *
+	     * However sometimes it can't because of Cross-Origin-Resource-Security policy.
+	     *
+	     * @param progressCallback callback which is called to notice the loading is progressing.
+	     * @protected
+	     */
+	    fetchParameters(directory: string, progressCallback?: (loaded: number, total: number) => any): Promise<ArrayBuffer>;
+	    /**
+	     * Load cached descriptor from WebStorage
+	     * @protected
+	     */
+	    restoreCachedDescriptor(directory: string): Promise<GraphDescriptorWebassembly | null>;
+	    /**
+	     * Load cached descriptor from WebStorage
+	     * @protected
+	     */
+	    restoreCachedParameters(directory: string, progressCallback?: (loaded: number, total: number) => any): Promise<ArrayBuffer | null>;
+	    /**
+	     * save cache
+	     */
+	    saveCache(directory: string, descriptor: GraphDescriptorWebassembly, parameters: ArrayBuffer): Promise<void>;
 	    setPlaceholderValue(values: {
 	        [key: string]: number;
 	    }): Promise<void>;
@@ -592,7 +942,7 @@ declare module 'webdnn/graph_descriptor/graph_descriptor_webgl' {
 	import { GraphDescriptor } from 'webdnn/graph_descriptor/graph_descriptor';
 	import { Allocation, MemoryLayout, ResolvedAllocation } from 'webdnn/graph_descriptor/memory_layout';
 	/**
-	 * @protecte
+	 * @protected
 	 */
 	export type ChannelMode = 'RGBA' | 'R';
 	/**
@@ -660,7 +1010,7 @@ declare module 'webdnn/graph_descriptor/graph_descriptor_webgl' {
 	    shader_name: string;
 	    uniforms: {
 	        [name: string]: {
-	            type: 'int' | 'float' | 'vec2' | 'vec4' | 'sampler2D';
+	            type: 'int' | 'float' | 'vec2' | 'vec3' | 'vec4' | 'ivec2' | 'ivec3' | 'ivec4' | 'sampler2D';
 	            value: number;
 	        };
 	    };
@@ -722,7 +1072,14 @@ declare module 'webdnn/webgl_handler' {
 	export default class WebGLHandler {
 	    static IS_SAFARI: boolean;
 	    readonly gl: WebGLRenderingContext | WebGL2RenderingContext;
-	    constructor();
+	    static getInstance(): WebGLHandler;
+	    /**
+	     * WebGLHandler is singleton class and instantiate directly is forbidden (constructor is hidden).
+	     *
+	     * Since the number of GPU contexts may be limited, the handler is used as a singleton
+	     * and only one context is shared among multiple runners.
+	     */
+	    private constructor();
 	    createTexture(textureWidth: number, textureHeight: number, internalFormat: number, format: number): WebGLTexture;
 	    createVertexShader(source: string): WebGLShader;
 	    createFragmentShader(source: string): WebGLShader;
@@ -743,6 +1100,7 @@ declare module 'webdnn/webgl_handler' {
 	     */
 	    static checkAvailability(): boolean;
 	    waitForComplete(): Promise<void>;
+	    readonly MAX_TEXTURE_SIZE: number;
 	}
 
 }
@@ -819,13 +1177,12 @@ declare module 'webdnn/buffer/buffer_webgl' {
 	 */
 	/** Don't Remove This comment block */
 	import { ChannelMode } from 'webdnn/graph_descriptor/graph_descriptor_webgl';
-	import WebGLHandler from 'webdnn/webgl_handler';
 	import { Buffer } from 'webdnn/buffer/buffer';
 	/**
 	 * @protected
 	 */
 	export default class BufferWebGL extends Buffer {
-	    private static handler;
+	    private handler;
 	    readonly channelMode: ChannelMode;
 	    readonly elementsPerPixel: number;
 	    readonly pixelStride: number;
@@ -838,7 +1195,6 @@ declare module 'webdnn/buffer/buffer_webgl' {
 	    readonly name: string;
 	    private readTextureUnitIndices;
 	    private isBoundToDrawFrameBuffer;
-	    static init(handler: WebGLHandler): void;
 	    constructor(byteLength: number, textureWidth: number, textureHeight: number, name: string, array: Float32Array | null, channelMode: ChannelMode);
 	    readonly texture: WebGLTexture | null;
 	    readonly length: number;
@@ -903,23 +1259,36 @@ declare module 'webdnn/descriptor_runner/descriptor_runner_webgl' {
 	import { GraphDescriptorWebGL } from 'webdnn/graph_descriptor/graph_descriptor_webgl';
 	import SymbolicFloat32Array from 'webdnn/symbolic_typed_array/symbolic_float32array';
 	import { BackendName } from 'webdnn/webdnn';
-	import WebGLHandler from 'webdnn/webgl_handler';
 	import { DescriptorRunner } from 'webdnn/descriptor_runner/descriptor_runner';
 	/**
 	 * @protected
 	 */
-	export default class DescriptorRunnerWebGL extends DescriptorRunner<GraphDescriptorWebGL> {
+	export default class DescriptorRunnerWebGL extends DescriptorRunner<GraphDescriptorWebGL, ArrayBuffer> {
 	    readonly backendName: BackendName;
 	    private runtimeInfo;
-	    handler: WebGLHandler;
+	    private handler;
 	    private vertexShader;
 	    private programs;
 	    private buffers;
-	    private inputViews;
-	    private outputViews;
 	    static checkAvailability(): boolean;
 	    init(): Promise<void>;
-	    load(directory: string, progressCallback?: (loaded: number, total: number) => any): Promise<void>;
+	    fetchDescriptor(directory: string): Promise<any>;
+	    fetchParameters(directory: string, progressCallback?: (loaded: number, total: number) => any): Promise<ArrayBuffer>;
+	    /**
+	     * Load cached descriptor from WebStorage
+	     * @protected
+	     */
+	    restoreCachedDescriptor(directory: string): Promise<GraphDescriptorWebGL | null>;
+	    /**
+	     * Load cached descriptor from WebStorage
+	     * @protected
+	     */
+	    restoreCachedParameters(directory: string, progressCallback?: (loaded: number, total: number) => any): Promise<ArrayBuffer | null>;
+	    /**
+	     * save cache
+	     */
+	    saveCache(directory: string, descriptor: GraphDescriptorWebGL, parameters: ArrayBuffer): Promise<void>;
+	    setDescriptorAndParameters(descriptor: GraphDescriptorWebGL, parameters: ArrayBuffer): Promise<void>;
 	    private initializeStaticBuffer(weightRawArray);
 	    private initializeDynamicBuffer();
 	    private setDescriptor(descriptor);
@@ -949,12 +1318,19 @@ declare module 'webdnn/webgpu_handler' {
 	    private commandQueue;
 	    private pipelineStates;
 	    private commandBuffer;
-	    constructor();
+	    static getInstance(): WebGPUHandler;
+	    /**
+	     * WebGPUHandler is singleton class and instantiate directly is forbidden (constructor is hidden).
+	     *
+	     * Since the number of GPU contexts may be limited, the handler is used as a singleton
+	     * and only one context is shared among multiple runners.
+	     */
+	    private constructor();
 	    createBuffer(arrayBuffer: ArrayBufferView): WebGPUBuffer;
 	    loadKernel(librarySource: string, namespace?: string): void;
 	    createCommandBuffer(): WebGPUCommandBuffer;
 	    getPipelineStateByName(name: string): WebGPUComputePipelineState;
-	    executeSinglePipelineState(name: string, threadgroupsPerGrid: WebGPUSize, threadsPerThreadgroup: WebGPUSize, buffers: (WebGPUBuffer | BufferWebGPU)[], getCompletedPromise?: boolean, flagDelay?: boolean): Promise<void> | null;
+	    executeSinglePipelineState(name: string, threadgroupsPerGrid: WebGPUSize, threadsPerThreadgroup: WebGPUSize, buffers: (WebGPUBuffer | BufferWebGPU)[], getCompletedPromise?: boolean): Promise<void> | null;
 	    sync(): Promise<void>;
 	}
 	/**
@@ -965,23 +1341,17 @@ declare module 'webdnn/webgpu_handler' {
 
 }
 declare module 'webdnn/buffer/buffer_webgpu' {
-	/**
-	 * @module webdnn
-	 */
-	/** Don't Remove This comment block */
-	import WebGPUHandler from 'webdnn/webgpu_handler';
 	import { Buffer } from 'webdnn/buffer/buffer';
 	/**
 	 * @protected
 	 */
 	export default class BufferWebGPU extends Buffer {
-	    private static handler;
 	    buffer: WebGPUBuffer;
 	    bufferView: Uint8Array;
+	    private handler;
 	    constructor(byteLength: number);
 	    write(src: ArrayBufferView, dst_offset?: number): Promise<void>;
 	    read(dst: any, src_offset?: number, length?: number): Promise<void>;
-	    static init(webgpuHandler: WebGPUHandler): void;
 	    getWriteView(offset: number, length: number, type: Int32ArrayConstructor): Int32Array;
 	    getWriteView(offset: number, length: number, type: Float32ArrayConstructor): Float32Array;
 	    getReadView(offset: number, length: number, type: Int32ArrayConstructor): Int32Array;
@@ -1026,34 +1396,143 @@ declare module 'webdnn/descriptor_runner/descriptor_runner_webgpu' {
 	import { BackendName } from 'webdnn/webdnn';
 	import { DescriptorRunner } from 'webdnn/descriptor_runner/descriptor_runner';
 	/**
+	 * DescriptorRunner for WebGPU
 	 * @protected
 	 */
-	export default class DescriptorRunnerWebGPU extends DescriptorRunner<GraphDescriptorWebGPU> {
+	export default class DescriptorRunnerWebGPU extends DescriptorRunner<GraphDescriptorWebGPU, ArrayBuffer> {
+	    /**
+	     * backend name
+	     */
 	    readonly backendName: BackendName;
+	    /**
+	     * WebGPU Handler
+	     */
 	    private webgpuHandler;
-	    private shaderLanguage;
+	    /**
+	     * Static buffer, whose size and layout can be determined in compile time.
+	     */
 	    private staticBuffer;
+	    /**
+	     * Buffers whose size and layout cannot be determined without runtime information like image size (if it's dynamic).
+	     */
 	    private dynamicBuffer;
+	    /**
+	     * Buffers which contains metadata shared in each GPU kernel thread (ex. hyper parameters).
+	     */
 	    private metaBuffers;
-	    private inputViews;
-	    private outputViews;
+	    /**
+	     * Execution information such as each kernel size, input and output buffers, etc.
+	     */
 	    private executionInfos;
+	    /**
+	     * Return `true` if this backend is available in this environment.
+	     * @returns {boolean}
+	     */
 	    static checkAvailability(): boolean;
-	    constructor(option?: any);
+	    /**
+	     * Initialize descriptor runner asynchronously
+	     * @returns {Promise<void>} Promise object which is resolved when the initialization finished.
+	     */
 	    init(): Promise<void>;
-	    private initializeBasicKernels();
+	    /**
+	     * Check whether current GPU is supported or not. If it's not supported, an error is thrown.
+	     * @returns {Promise<void>}
+	     */
 	    private checkIncompatibleGPU();
-	    load(directory: string, progressCallback?: (loaded: number, total: number) => any): Promise<void>;
+	    /**
+	     * Fetch graph descriptor from specified directory.
+	     *
+	     * @param directory directory where descriptor is contained.
+	     * You can also provide URL of other domain like this.
+	     *
+	     * ```javascript
+	     * await runner.load('://my.other.domain.com/my_model');
+	     * ```
+	     *
+	     * However sometimes it can't because of Cross-Origin-Resource-Security policy.
+	     *
+	     * @protected
+	     */
+	    fetchDescriptor(directory: string): Promise<GraphDescriptorWebGPU>;
+	    /**
+	     * Fetch parameter files from specified directory.
+	     *
+	     * @param directory directory where descriptor is contained.
+	     * You can also provide URL of other domain like this.
+	     *
+	     * ```javascript
+	     * await runner.load('://my.other.domain.com/my_model');
+	     * ```
+	     *
+	     * However sometimes it can't because of Cross-Origin-Resource-Security policy.
+	     *
+	     * @param progressCallback callback which is called to notice the loading is progressing.
+	     * @protected
+	     */
+	    fetchParameters(directory: string, progressCallback?: (loaded: number, total: number) => any): Promise<ArrayBuffer>;
+	    /**
+	     * Load cached descriptor from WebStorage
+	     * @protected
+	     */
+	    restoreCachedDescriptor(directory: string): Promise<GraphDescriptorWebGPU | null>;
+	    /**
+	     * Load cached descriptor from WebStorage
+	     * @protected
+	     */
+	    restoreCachedParameters(directory: string, progressCallback?: (loaded: number, total: number) => any): Promise<ArrayBuffer | null>;
+	    /**
+	     * save cache
+	     */
+	    saveCache(directory: string, descriptor: GraphDescriptorWebGPU, parameters: ArrayBuffer): Promise<void>;
+	    setDescriptorAndParameters(descriptor: GraphDescriptorWebGPU, parameter: ArrayBuffer): Promise<void>;
+	    /**
+	     * Initialize static buffers, whose size and position can be determined in compile time.
+	     *
+	     * @param {ArrayBuffer} weightRawArray constant weight buffer
+	     * @returns {Promise<void>}
+	     */
 	    private initializeStaticBuffer(weightRawArray);
+	    /**
+	     * Initialize meta buffers, which contains metadata shared in each GPU kernel thread (ex. hyper parameters).
+	     * @returns {Promise<void>}
+	     */
 	    private initializeMetaBuffers();
+	    /**
+	     * Initialize dynamic buffers, whose size and position cannot be determined without runtime-information such as input image size
+	     * (if it's dynamic).
+	     * When all placeholder is resolved, this method is automatically called.
+	     *
+	     * @returns {Promise<void>}
+	     */
 	    private initializeDynamicBuffer();
-	    private setDescriptor(descriptor);
-	    private compile();
+	    /**
+	     * Set actual value into placeholder. If all placeholder is resolved,
+	     * [[DescriptorRunnerWebGPU#initializeDynamicBuffer|`initializeDynamicBuffer()`]] is automatically called.
+	     *
+	     * @param values mapping object of placeholder name and value
+	     * @returns {Promise<void>}
+	     */
 	    setPlaceholderValue(values: {
 	        [key: string]: number;
 	    }): Promise<void>;
+	    /**
+	     * Get input [[webdnn.SymbolicFloat32Array|`SymbolicFloat32Array`]] object
+	     *
+	     * @returns array of input [[webdnn.SymbolicFloat32Array|`SymbolicFloat32Array`]]
+	     * @deprecated Use [[webdnn.DescriptorRunner.inputs|`inputs`]] instead
+	     */
 	    getInputViews(): SymbolicFloat32Array[];
+	    /**
+	     * Get output [[webdnn.SymbolicFloat32Array|`SymbolicFloat32Array`]] object
+	     *
+	     * @returns array of output [[webdnn.SymbolicFloat32Array|`SymbolicFloat32Array`]]
+	     * @deprecated Use [[webdnn.DescriptorRunner.outputs|`outputs`]] instead
+	     */
 	    getOutputViews(): SymbolicFloat32Array[];
+	    /**
+	     * Run descriptor. You must call [[webdnn.DescriptorRunner.getInputViews|`getInputViews`]] and
+	     * [[webdnn.DescriptorRunner.getOutputViews|`getOutputViews`]] before calling this function.
+	     */
 	    run(): Promise<void>;
 	}
 
@@ -1194,9 +1673,9 @@ declare module 'webdnn/image/image_array' {
 	    /** The data order */
 	    order?: Order;
 	    /** Bias value, which is parsed based on [[webdnn/image.ImageArrayOption.order|`order`]] value */
-	    bias?: number[];
+	    bias?: number[] | number;
 	    /** Scale value, which is parsed based on [[webdnn/image.ImageArrayOption.order|`order`]] value */
-	    scale?: number[];
+	    scale?: number[] | number;
 	}
 	/**
 	 * Types which are drawable at `HTMLCanvasElement`
@@ -1234,7 +1713,7 @@ declare module 'webdnn/image/image_array' {
 	 *
 	 * - If `image` is an instance of `string`, it will be regarded as image url, and this method fetches that url.
 	 *
-	 * - If `image` is an instance of `HTMLInputElement`, it will be regarded as file inpu,
+	 * - If `image` is an instance of `HTMLInputElement`, it will be regarded as file input,
 	 *   and this method loads the selected image file.
 	 *
 	 * - Otherwise, `image` will be regarded as drawable object.
@@ -1300,7 +1779,7 @@ declare module 'webdnn/image/image_array' {
 	 *
 	 *   ```ts
 	 *   let runner = await WebDNN.load('./model');
-	 *   let output = runner.getOutputViews()[0];
+	 *   let output = runner.outputs[0];
 	 *
 	 *   await runner.run();
 	 *
@@ -1352,14 +1831,14 @@ declare module 'webdnn/math/argsort' {
 	 */
 	/** Don't Remove This comment block */
 	/**
-	* Return indices of the top-K largest elements.
-	* This implementation is not stable sort.
-	*
-	* @param {number[]|Float32Array|Int32Array} arr array
-	* @param {number} k number of indices
-	* @returns {number[]} indices of top-K largest samples
-	*/
-	export function argmax(arr: number[] | Float32Array | Int32Array, k?: number): number[];
+	 * Return indices of the top-K largest elements.
+	 * This implementation is not stable sort.
+	 *
+	 * @param {number[]|Float32Array} arr array
+	 * @param {number} k number of indices
+	 * @returns {number[]} indices of top-K largest samples
+	 */
+	export function argmax(arr: number[] | Float32Array, k?: number): number[];
 	/**
 	 * Return indices of the top-K smallest elements.
 	 * This implementation is not stable sort.
@@ -1391,20 +1870,20 @@ declare module 'webdnn/webdnn' {
 	 * Module `WebDNN` provides main features of WebDNN.
 	 */
 	/** Don't Remove This comment block */
-	import { DescriptorRunner as _DescriptorRunner } from 'webdnn/descriptor_runner/descriptor_runner';
+	import { DescriptorRunner as DescriptorRunnerGeneric } from 'webdnn/descriptor_runner/descriptor_runner';
 	import { GraphDescriptor } from 'webdnn/graph_descriptor/graph_descriptor';
 	import * as Image from 'webdnn/image';
 	import * as Math from 'webdnn/math';
 	/**
-	 * get DEBUG flag for developing WebDNN
+	 * get configuration
 	 * @private
 	 */
-	export function isDebugMode(): boolean;
+	export function getConfiguration<T>(key: string, defaultValue?: T): T;
 	/**
-	 * set DEBUG flag for developing WebDNN
+	 * set configuration
 	 * @private
 	 */
-	export function setDebugMode(flag: any): void;
+	export function setConfiguration(key: string, value: any): void;
 	/**
 	 * Backend names supported in WebDNN
 	 */
@@ -1412,7 +1891,7 @@ declare module 'webdnn/webdnn' {
 	/**
 	 * Descriptor runner
 	 */
-	export type DescriptorRunner = _DescriptorRunner<GraphDescriptor>;
+	export type DescriptorRunner = DescriptorRunnerGeneric<GraphDescriptor, any>;
 	/**
 	 * Result structure of [[getBackendAvailability|`WebDNN.getBackendAvailability`]]
 	 */
@@ -1468,11 +1947,6 @@ declare module 'webdnn/webdnn' {
 	    backendOptions?: {
 	        [key: string]: any;
 	    };
-	    /**
-	     * If true, WebDNN fetches binary data even if the data is already cached (append tiestamp to request url).
-	     * Otherwise, WebDNN fetches same URL and generally browser cache is used.
-	     */
-	    ignoreCache?: boolean;
 	    /**
 	     * Callback function which is called to notice the progress status of loading binary data.
 	     *
@@ -1537,6 +2011,36 @@ declare module 'webdnn/webdnn' {
 	     * ```
 	     */
 	    transformUrlDelegate?: (url: string) => string;
+	    /**
+	     * WebDNN cache strategy. One of follows is available.
+	     *
+	     * - `latest` (default)
+	     *
+	     *  Fetch `descriptor.json` at first and check whether assets in server is same as cached assets. If it's same, use cached assets,
+	     *  otherwise, fetch all assets and replace cached assets.
+	     *
+	     * - `networkFirst`
+	     *
+	     *  Fetch all asset files. If it succeeds, use fetched assets. If failed, use cached assets if exist, otherwise, an error is thrown.
+	     *
+	     * - `cacheFirst`
+	     *
+	     *  If cache is exist, use cache, otherwise, fetch assets. If it failed, an error is thrown.
+	     *
+	     * - `networkOnly`
+	     *
+	     *  Fetch all asset files. If failed, an error is thrown.
+	     *
+	     * - `cacheOnly`
+	     *
+	     *  If cache is exist, use cache, otherwise, an error is thrown.
+	     *
+	     */
+	    cacheStrategy?: 'latest' | 'networkFirst' | 'cacheFirst' | 'networkOnly' | 'cacheOnly';
+	    /**
+	     * If true, WebDNN save fetched parameter data cache in available `WebStorage`. As default, it's `true`.
+	     */
+	    saveCache?: boolean;
 	}
 	/**
 	 * Initialize descriptor runner. This function performs follow things.
