@@ -8,7 +8,8 @@
 
 _<a href="http://make.girls.moe/#/">this</a> page._
 
-*We'll make new system *better than* 'Make Girls'.*
+*We respect the service.*  
+*We'll make a new service like this.*
 
 - - -
 
