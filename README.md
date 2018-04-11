@@ -62,14 +62,14 @@ youkaiwatch
 * Made a function to render generated images by Python with JavaScript.
 * Web page and JavaScript relations person in charge.
 
-<img src="https://avatars0.githubusercontent.com/u/31244102?s=96&v=4" title="CommandSlash017">  
+<img src="https://avatars0.githubusercontent.com/u/31244102?s=96&v=4" title="Mixaz017">  
 
 ```
-CommandSlash017
+Mixaz017
 14 years old
 ```
 
-<a href="https://github.com/CommandSlash017">GitHub</a>  
+<a href="https://github.com/Mixaz017">GitHub</a>  
 <a href="https://scratch.mit.edu/users/CommandSlash017/"> Scratch</a>  
 
 #### Main activity
