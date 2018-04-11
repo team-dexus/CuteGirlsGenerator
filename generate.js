@@ -15,7 +15,7 @@ function generate(){ //Added by mirukuma ,Changed by JPNYKW ,Changed by mirukuma
 
 function generate2(){
   d.getElementById("generate").setAttribute("disabled", true)
-  d.getElementById("download").setAttribute("disabled", true)
+  if (onGenerated) d.getElementById("download").setAttribute("disabled", true)
   onGenerated=false; //Added by JPNYKW
 
   //生成
