@@ -13,8 +13,8 @@ window.onload = () => {
 	cont = canv.getContext('2d');
 	w = d.getElementById('w');
 	h = d.getElementById('h');
-	canv.width = 128;
-	canv.height = 128;
+	canv.width = 256;
+	canv.height = 256;
 	textRoll('-Generate ultimate cute girls-', d.getElementById('display'), 50, d.getElementById('shel'), '<h1 class="logo">-Generate <span class="text">ultimate cute</span> girls.-</h1>');
 	tag=str=>str.split(/[\　\ ]+/ig);
 

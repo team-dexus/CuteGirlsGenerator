@@ -1,6 +1,6 @@
 //created by JPNYKW
 
-var wid=64,hig=64; // for draw engine
+var wid=128,hig=128; // for draw engine
 
 CanvasRenderingContext2D.prototype.drawImageByData=function($Array,$width,$height,$find,$px,$x,$y){
 	let $dy=$y+$px/2;

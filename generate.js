@@ -20,16 +20,16 @@ function generate2(){
 
   //生成
   let x = runner.inputs[0];
-  let x2 = runner.inputs[1];
-  console.log(x)
   let y = runner.outputs[0];
 
-  var noise= new Float32Array(100)
+  noise_size = 128;
+  var noise= new Float32Array(noise_size)
 
-  for(i=0; i<100; i=i+1){
+  for(i=0; i<noise_size; i=i+1){
     noise[i]=Math.random()*2-1
   }
 
+  /*
   numberOfTag=1539
 
   var tags= new Float32Array(numberOfTag)
@@ -46,11 +46,9 @@ function generate2(){
 
   //タグの指定
 
-
   x.set(noise);
-  x2.set(tags)
   console.log(x)
-  console.log(x2.toActual())
+  console.log("sex")
   runner.run()
     .then(function() {
       console.log('finished');
