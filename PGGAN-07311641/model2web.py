@@ -143,7 +143,6 @@ def save_images(images,file_name):
     print(images.shape)
     Image.fromarray(images.astype(np.uint8))\
         .save("%s.png" % (file_name))
-    display_png((Image.fromarray(images.astype(np.uint8))))
 
 def save_generated_image(image,name):
     Imag=combine_images(image)
@@ -171,5 +170,5 @@ graph = ChainerConverter().convert([x], [y])
 
 from webdnn.backend import generate_descriptor
 
-exec_info = generate_descriptor("webgl", graph)  # also "webassembly", "webgl", "fallback" are available.
+exec_info = generate_descriptor("webgpu", graph)  # also "webassembly", "webgl", "fallback" are available.
 exec_info.save("./output")
