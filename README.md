@@ -1,3 +1,7 @@
+# Important infomation
+Moved to [this](#) repo.  
+Just now disconnected Github Pages with master.
+
 # CuteGirlsGenerator
 
 ## What is the projects
