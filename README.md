@@ -1,5 +1,5 @@
 # Important infomation
-Moved to [this](#) repo.  
+Moved to [this](https://github.com/TeamPMG/CuteGirlsGenerator-Organized-) repo.  
 Just now disconnected Github Pages with master.
 
 # CuteGirlsGenerator
